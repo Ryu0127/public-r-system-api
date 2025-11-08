@@ -32,9 +32,12 @@ class LifeScheduleMonthTaskController extends Controller
                 'message' => 'Invalid year-month format. Expected YYYY-MM format.'
             ], 400);
         }
-
+        
+        // 年月から開始日と終了日を生成
+        $startDate = $yearMonth . '-01';
+        $endDate = date('Y-m-t', strtotime($startDate)); // 月の最終日
         // 指定年月のスケジュール取得
-        $tblLifeSchedules = $this->tblLifeScheduleRepository->findByYearMonth($yearMonth);
+        $tblLifeSchedules = $this->tblLifeScheduleRepository->selectByYearMonth($startDate, $endDate);
 
         $responseData = [
             'status' => true,

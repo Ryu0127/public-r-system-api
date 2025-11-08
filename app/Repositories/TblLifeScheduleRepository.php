@@ -42,12 +42,8 @@ class TblLifeScheduleRepository
      * 指定年月のスケジュール取得
      * @param  $yearMonth  年月 (YYYY-MM形式)
      */
-    public function findByYearMonth($yearMonth)
+    public function selectByYearMonth($startDate, $endDate)
     {
-        // 年月から開始日と終了日を生成
-        $startDate = $yearMonth . '-01';
-        $endDate = date('Y-m-t', strtotime($startDate)); // 月の最終日
-
         return TblLifeSchedule::where('schedule_date', '>=', $startDate)
             ->where('schedule_date', '<=', $endDate)
             ->orderBy('schedule_date')
