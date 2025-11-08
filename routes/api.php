@@ -1,6 +1,7 @@
 <?php
 
 use App\Apis\Life\LifeScheduleDayTaskController;
+use App\Apis\Life\LifeScheduleMonthTaskController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,3 +29,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/life/schedule-day/tasks/{date}', [LifeScheduleDayTaskController::class, 'index']);
 // POST:LifeSystem-日次スケジュールタスク（データ更新API）
 Route::post('/life/schedule-day/tasks', [LifeScheduleDayTaskController::class, 'doUpdate']);
+// GET:LifeSystem-月次スケジュールタスク（データ取得API）
+Route::get('/life/schedule-month/tasks/{yearMonth}', [LifeScheduleMonthTaskController::class, 'index']);
