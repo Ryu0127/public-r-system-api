@@ -1,0 +1,62 @@
+name: Deploy to ConoHa VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            echo "=== Starting deployment ==="
+            
+            # リポジトリディレクトリに移動
+            cd /var/www/html/public-r-system-api
+            
+            # 最新のコードを取得
+            echo "Pulling latest code from main branch..."
+            git pull origin main
+            
+            # Composerの依存関係をインストール
+            # echo "Installing composer dependencies..."
+            # composer install --no-dev --optimize-autoloader --no-interaction
+            
+            # .envファイルの確認（存在チェックのみ）
+            if [ ! -f .env ]; then
+              echo "Warning: .env file not found!"
+            fi
+            
+            # キャッシュクリア
+            echo "Clearing caches..."
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan route:clear
+            php artisan view:clear
+            
+            # キャッシュ再生成
+            echo "Regenerating caches..."
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            
+            # ストレージリンクの作成（初回のみ必要、エラーは無視）
+            php artisan storage:link 2>/dev/null || true
+            
+            # パーミッション設定
+            echo "Setting permissions..."
+            chmod -R 775 storage bootstrap/cache
+            
+            # Apacheの再起動（必要に応じて）
+            # sudo systemctl reload apache2
+            
+            echo "=== Deployment completed successfully! ==="
