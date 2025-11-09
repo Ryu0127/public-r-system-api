@@ -3,6 +3,7 @@
 use App\Apis\Life\LifeScheduleDayTaskController;
 use App\Apis\Life\LifeScheduleMonthTaskController;
 use App\Apis\Sync\Life\LifeScheduleController;
+use App\Apis\Sync\Life\LifeScheduleNotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,3 +41,7 @@ Route::get('/life/schedule-month/tasks/{yearMonth}', [LifeScheduleMonthTaskContr
  */
 // GET:Sync-生活スケジュール同期API（外部サーバー連携用・ページング対応）
 Route::get('/sync/life/schedule', [LifeScheduleController::class, 'index']);
+// POST:Sync-生活スケジュール通知登録API（外部サーバー連携用）
+Route::post('/sync/life/schedule/notification', [LifeScheduleNotificationController::class, 'store']);
+// DELETE:Sync-生活スケジュール通知削除API（外部サーバー連携用）
+Route::delete('/sync/life/schedule/notification/{id}', [LifeScheduleNotificationController::class, 'destroy']);
