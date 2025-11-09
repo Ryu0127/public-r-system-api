@@ -47,6 +47,7 @@ class LifeScheduleDayTaskController extends Controller
                         'endDateTime' => $tblLifeSchedule->end_date_time,
                         'projectId' => $tblLifeSchedule->id,
                         'remarks' => $tblLifeSchedule->remarks,
+                        'notificationRequestFlag' => $tblLifeSchedule->notification_request_flag,
                     ];
                 })->values(),
             ]
@@ -118,7 +119,7 @@ class LifeScheduleDayTaskController extends Controller
             'start_date_time' => $requestTask['startDateTime'],
             'end_date_time' => $requestTask['endDateTime'],
             'schedule_contents' => $requestTask['taskName'],
-            'notification_request_flag' => 0,
+            'notification_request_flag' => $requestTask['notificationRequestFlag'] ?? 0,
             'notification_comp_flag' => 0,
             'remarks' => $requestTask['remarks'],
         ];
@@ -130,6 +131,7 @@ class LifeScheduleDayTaskController extends Controller
             'end_date_time' => $requestTask['endDateTime'],
             'schedule_contents' => $requestTask['taskName'],
             'remarks' => $requestTask['remarks'],
+            'notification_request_flag' => $requestTask['notificationRequestFlag'] ?? 0,
         ];
     }
 }
