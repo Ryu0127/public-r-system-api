@@ -172,8 +172,8 @@ class LifeScheduleDayTaskController extends Controller
         }
 
         // 通知ONの場合
-        // 通知時刻を計算（開始時刻の15分前）
-        $notificationDateTime = date('Y-m-d H:i:s', strtotime($startDateTime . ' -15 minutes'));
+        // 通知時刻を計算（開始時刻の5分前）
+        $notificationDateTime = date('Y-m-d H:i:s', strtotime($startDateTime . ' -5 minutes'));
 
         if ($existingNotification) {
             // 既存データがある場合
