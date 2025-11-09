@@ -63,6 +63,19 @@ class TblLifeScheduleRepository
     }
 
     /**
+     * 指定日以降のスケジュール取得（ページネーション付き）
+     * @param  string $date     検索開始日（YYYY-MM-DD形式）
+     * @param  int    $perPage  １ページ中に表示するアイテム数
+     */
+    public function paginateAfterDate(string $date, int $perPage)
+    {
+        return TblLifeSchedule::where('schedule_date', '>=', $date)
+            ->orderBy('schedule_date')
+            ->orderBy('start_date_time')
+            ->paginate($perPage);
+    }
+
+    /**
      * 新規登録
      * @param  $entity
      */
