@@ -2,7 +2,7 @@
 
 use App\Apis\Life\LifeScheduleDayTaskController;
 use App\Apis\Life\LifeScheduleMonthTaskController;
-use App\Apis\Life\LifeScheduleSyncController;
+use App\Apis\Sync\Life\LifeScheduleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,5 +32,11 @@ Route::get('/life/schedule-day/tasks/{date}', [LifeScheduleDayTaskController::cl
 Route::post('/life/schedule-day/tasks', [LifeScheduleDayTaskController::class, 'doUpdate']);
 // GET:LifeSystem-月次スケジュールタスク（データ取得API）
 Route::get('/life/schedule-month/tasks/{yearMonth}', [LifeScheduleMonthTaskController::class, 'index']);
-// GET:LifeSystem-スケジュール同期API（外部サーバー連携用・ページング対応）
-Route::get('/life/schedule-sync', [LifeScheduleSyncController::class, 'index']);
+
+/*
+ * --------------------------------------------------------------------------
+ * 外部連携システム
+ * --------------------------------------------------------------------------
+ */
+// GET:Sync-生活スケジュール同期API（外部サーバー連携用・ページング対応）
+Route::get('/sync/life/schedule', [LifeScheduleController::class, 'index']);

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Apis\Life;
+namespace App\Apis\Sync\Life;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\TblLifeScheduleRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
-class LifeScheduleSyncController extends Controller
+class LifeScheduleController extends Controller
 {
     private $tblLifeScheduleRepository;
 
@@ -17,7 +17,7 @@ class LifeScheduleSyncController extends Controller
 
     /**
      * スケジュール同期API（外部サーバー連携用）
-     * GET /life/schedule-sync
+     * GET /sync/life/schedule
      *
      * @param Request $request
      * @return JsonResponse
