@@ -4,15 +4,18 @@ namespace App\Apis\Life;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\TblLifeScheduleRepository;
+use App\Repositories\TblLifeScheduleNotificationRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class LifeScheduleDayTaskController extends Controller
 {
     private $tblLifeScheduleRepository;
+    private $tblLifeScheduleNotificationRepository;
 
     public function __construct() {
         $this->tblLifeScheduleRepository = new TblLifeScheduleRepository();
+        $this->tblLifeScheduleNotificationRepository = new TblLifeScheduleNotificationRepository();
     }
 
     /**
@@ -47,6 +50,7 @@ class LifeScheduleDayTaskController extends Controller
                         'endDateTime' => $tblLifeSchedule->end_date_time,
                         'projectId' => $tblLifeSchedule->id,
                         'remarks' => $tblLifeSchedule->remarks,
+                        'notificationRequestFlag' => $tblLifeSchedule->notification_request_flag,
                     ];
                 })->values(),
             ]
@@ -70,17 +74,31 @@ class LifeScheduleDayTaskController extends Controller
             if (filled($task['taskId']) && blank($task['taskName'])) {
                 // スケジュールの削除
                 $this->tblLifeScheduleRepository->deleteByPk($task['taskId']);
+                // 通知未完了データも削除
+                $this->tblLifeScheduleNotificationRepository->deleteIncompleteByScheduleId($task['taskId']);
                 continue;
             }
             if (filled($task['taskId']) && filled($task['taskName'])) {
                 // スケジュールの更新
                 $tblLifeScheduleUpdateEntity = $this->mapToTblLifeScheduleEntityUpdate($task);
                 $this->tblLifeScheduleRepository->updateByPk($task['taskId'], $tblLifeScheduleUpdateEntity);
+                // 通知管理処理
+                $this->manageNotification(
+                    $task['taskId'],
+                    $task['startDateTime'],
+                    $task['notificationRequestFlag'] ?? 0
+                );
                 continue;
             }
             // スケジュールの追加
             $tblLifeScheduleInsertEntity = $this->mapToTblLifeScheduleEntityInsert($task, $request['scheduleDate']);
-            $this->tblLifeScheduleRepository->insert($tblLifeScheduleInsertEntity);
+            $newSchedule = $this->tblLifeScheduleRepository->insert($tblLifeScheduleInsertEntity);
+            // 通知管理処理
+            $this->manageNotification(
+                $newSchedule->id,
+                $task['startDateTime'],
+                $task['notificationRequestFlag'] ?? 0
+            );
         }
         return response()->json([
             'status' => true
@@ -118,7 +136,7 @@ class LifeScheduleDayTaskController extends Controller
             'start_date_time' => $requestTask['startDateTime'],
             'end_date_time' => $requestTask['endDateTime'],
             'schedule_contents' => $requestTask['taskName'],
-            'notification_request_flag' => 0,
+            'notification_request_flag' => $requestTask['notificationRequestFlag'] ?? 0,
             'notification_comp_flag' => 0,
             'remarks' => $requestTask['remarks'],
         ];
@@ -130,6 +148,56 @@ class LifeScheduleDayTaskController extends Controller
             'end_date_time' => $requestTask['endDateTime'],
             'schedule_contents' => $requestTask['taskName'],
             'remarks' => $requestTask['remarks'],
+            'notification_request_flag' => $requestTask['notificationRequestFlag'] ?? 0,
         ];
+    }
+
+    /**
+     * 通知管理処理
+     * @param int $scheduleId
+     * @param string $startDateTime
+     * @param int $notificationRequestFlag
+     */
+    private function manageNotification($scheduleId, $startDateTime, $notificationRequestFlag)
+    {
+        // 既存の通知未完了データを取得
+        $existingNotification = $this->tblLifeScheduleNotificationRepository->findIncompleteByScheduleId($scheduleId);
+
+        if ($notificationRequestFlag == 0) {
+            // 通知OFFの場合、既存の通知未完了データを削除
+            if ($existingNotification) {
+                $this->tblLifeScheduleNotificationRepository->deleteIncompleteByScheduleId($scheduleId);
+            }
+            return;
+        }
+
+        // 通知ONの場合
+        // 通知時刻を計算（開始時刻の5分前）
+        $notificationDateTime = date('Y-m-d H:i:s', strtotime($startDateTime . ' -5 minutes'));
+
+        if ($existingNotification) {
+            // 既存データがある場合
+            if ($existingNotification->notification_date_time !== $notificationDateTime) {
+                // 通知時刻が変更された場合：DELETE & INSERT
+                $this->tblLifeScheduleNotificationRepository->deleteIncompleteByScheduleId($scheduleId);
+                $this->tblLifeScheduleNotificationRepository->insert([
+                    'life_schedule_id' => $scheduleId,
+                    'notification_date_time' => $notificationDateTime,
+                    'notification_comp_flag' => 0,
+                    'created_program_name' => 'life-schedule-day-task-api',
+                    'updated_program_name' => 'life-schedule-day-task-api',
+                ]);
+            }
+            // 通知時刻が同じ場合は何もしない
+        } else {
+            // 既存データがない場合：INSERT
+            $this->tblLifeScheduleNotificationRepository->insert([
+                'life_schedule_id' => $scheduleId,
+                'notification_date_time' => $notificationDateTime,
+                'notification_comp_flag' => 0,
+                'created_program_name' => 'life-schedule-day-task-api',
+                'updated_program_name' => 'life-schedule-day-task-api',
+            ]);
+        }
     }
 }

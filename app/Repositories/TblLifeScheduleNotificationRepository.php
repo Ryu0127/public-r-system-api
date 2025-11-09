@@ -68,6 +68,28 @@ class TblLifeScheduleNotificationRepository
     }
 
     /**
+     * 通知未完了データを取得（life_schedule_id指定）
+     * @param  $lifeScheduleId
+     */
+    public function findIncompleteByScheduleId($lifeScheduleId)
+    {
+        return TblLifeScheduleNotification::where('life_schedule_id', $lifeScheduleId)
+            ->where('notification_comp_flag', 0)
+            ->first();
+    }
+
+    /**
+     * 通知未完了データを削除（life_schedule_id指定）
+     * @param  $lifeScheduleId
+     */
+    public function deleteIncompleteByScheduleId($lifeScheduleId)
+    {
+        return TblLifeScheduleNotification::where('life_schedule_id', $lifeScheduleId)
+            ->where('notification_comp_flag', 0)
+            ->delete();
+    }
+
+    /**
      * Entityの生成（保存可能全カラム）
      * @param  $object
      */
