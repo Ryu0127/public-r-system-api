@@ -2,8 +2,8 @@
 
 use App\Apis\Life\LifeScheduleDayTaskController;
 use App\Apis\Life\LifeScheduleMonthTaskController;
+use App\Apis\Life\LifeScheduleNotificationController;
 use App\Apis\Sync\Life\LifeScheduleController;
-use App\Apis\Sync\Life\LifeScheduleNotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

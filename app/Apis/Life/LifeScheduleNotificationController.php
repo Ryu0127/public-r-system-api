@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Apis\Sync\Life;
+namespace App\Apis\Life;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\TblLifeScheduleNotificationRepository;
