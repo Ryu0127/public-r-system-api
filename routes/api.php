@@ -1,6 +1,8 @@
 <?php
 
-use App\Apis\Auth\AuthController;
+use App\Apis\Auth\LoginController;
+use App\Apis\Auth\AutoLoginController;
+use App\Apis\Auth\LogoutController;
 use App\Apis\Life\LifeScheduleDayTaskController;
 use App\Apis\Life\LifeScheduleMonthTaskController;
 use App\Apis\Sync\Life\LifeScheduleController;
@@ -28,11 +30,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
  * --------------------------------------------------------------------------
  */
 // POST:認証-ログイン（メールアドレス+パスワード認証）
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/login', LoginController::class);
 // POST:認証-自動ログイン（自動ログイントークン認証）
-Route::post('/auth/auto-login', [AuthController::class, 'autoLogin']);
+Route::post('/auth/auto-login', AutoLoginController::class);
 // POST:認証-ログアウト（自動ログイントークン無効化）
-Route::post('/auth/logout', [AuthController::class, 'logout']);
+Route::post('/auth/logout', LogoutController::class);
 
 /*
  * --------------------------------------------------------------------------
