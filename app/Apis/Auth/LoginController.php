@@ -25,7 +25,7 @@ class LoginController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function __invoke(Request $request): JsonResponse
+    public function doLogin(Request $request): JsonResponse
     {
         // バリデーション
         $validator = Validator::make($request->all(), [

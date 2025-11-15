@@ -30,11 +30,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
  * --------------------------------------------------------------------------
  */
 // POST:認証-ログイン（メールアドレス+パスワード認証）
-Route::post('/auth/login', LoginController::class);
+Route::post('/auth/login', [LoginController::class, 'doLogin']);
 // POST:認証-自動ログイン（自動ログイントークン認証）
-Route::post('/auth/auto-login', AutoLoginController::class);
+Route::post('/auth/auto-login', [AutoLoginController::class, 'doAutoLogin']);
 // POST:認証-ログアウト（自動ログイントークン無効化）
-Route::post('/auth/logout', LogoutController::class);
+Route::post('/auth/logout', [LogoutController::class, 'doLogout']);
 
 /*
  * --------------------------------------------------------------------------

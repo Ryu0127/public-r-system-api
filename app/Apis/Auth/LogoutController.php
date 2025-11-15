@@ -23,7 +23,7 @@ class LogoutController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function __invoke(Request $request): JsonResponse
+    public function doLogout(Request $request): JsonResponse
     {
         // 自動ログイントークンが提供されている場合は無効化
         if ($request->has('autoLoginToken')) {
