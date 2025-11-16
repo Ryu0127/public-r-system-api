@@ -90,18 +90,18 @@ class OshiKatsuSaportController extends Controller
                     ],
                     [
                         'id' => 2,
+                        'tag' => 'ときのそら生放送',
+                        'description' => '生放送',
+                    ],
+                    [
+                        'id' => 3,
                         'tag' => 'soraArt',
                         'description' => 'ファンアート',
                     ],
                     [
-                        'id' => 3,
+                        'id' => 4,
                         'tag' => 'そらArt',
                         'description' => 'ファンアート',
-                    ],
-                    [
-                        'id' => 4,
-                        'tag' => 'ときのそら生放送',
-                        'description' => '生放送',
                     ],
                     [
                         'id' => 5,
