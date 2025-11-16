@@ -22,12 +22,12 @@ class OshiKatsuSaportController extends Controller
                     [
                         'id' => '1',
                         'key' => 'tokinosora',
-                        'name' => 'ときのそら',
+                        'name' => 'ときのそら（Tokino Sora）',
                     ],
                     [
                         'id' => '2',
                         'key' => 'roboco',
-                        'name' => 'ロボ子さん',
+                        'name' => 'ロボ子さん（Robocosan）',
                     ],
                 ],
             ],
