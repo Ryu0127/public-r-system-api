@@ -105,53 +105,28 @@ class OshiKatsuSaportController extends Controller
                     ],
                     [
                         'id' => 5,
-                        'tag' => 'ときのそら聴いたよ',
-                        'description' => '楽曲感想',
-                    ],
-                    [
-                        'id' => 6,
-                        'tag' => 'ときのそら読んだよ',
-                        'description' => '書籍感想',
-                    ],
-                    [
-                        'id' => 7,
                         'tag' => 'ときのそら聞いたよ',
                         'description' => 'ボイス感想',
                     ],
                     [
-                        'id' => 8,
-                        'tag' => 'ときのそら撮ったよ',
-                        'description' => 'ホロリー',
-                    ],
-                    [
-                        'id' => 9,
-                        'tag' => 'ときのそらMMD',
-                        'description' => 'MMD',
-                    ],
-                    [
-                        'id' => 10,
-                        'tag' => 'ときのそら実況するってよ',
-                        'description' => '実況動画',
-                    ],
-                    [
-                        'id' => 11,
-                        'tag' => 'ときのそらスペース',
-                        'description' => 'Twitterスペース',
-                    ],
-                    [
-                        'id' => 12,
-                        'tag' => 'ときのそらクラフト',
-                        'description' => 'マインクラフト関係',
-                    ],
-                    [
-                        'id' => 13,
+                        'id' => 6,
                         'tag' => 'ときのそらFC',
                         'description' => 'ファンクラブ限定放送',
                     ],
                     [
-                        'id' => 14,
+                        'id' => 7,
                         'tag' => 'ときのそらと一緒',
                         'description' => 'ぬいぐるみ・ホロリー写真投稿用',
+                    ],
+                    [
+                        'id' => 8,
+                        'tag' => 'ときのそらスペース',
+                        'description' => 'Twitterスペース',
+                    ],
+                    [
+                        'id' => 9,
+                        'tag' => 'ときのそらクラフト',
+                        'description' => 'マインクラフト関係',
                     ],
                 ],
                 'eventHashtags' => [
@@ -160,7 +135,7 @@ class OshiKatsuSaportController extends Controller
                         'tag' => 'そらぱ2026',
                         'type' => 'live',
                         'eventName' => 'ときのそら　New Year\'s Party 2026「Dreams in Motion」',
-                        'url' => 'https://example.com/sorapparty2026',
+                        'url' => 'https://tokinosora-live.com/sorapa2026/',
                     ],
                 ],
             ],
