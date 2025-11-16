@@ -48,52 +48,11 @@ class HomeController extends Controller
                 'changeLogs' => [
                     [
                         'id' => '1',
-                        'version' => 'v2.5.0',
+                        'version' => 'v1.0.0',
                         'date' => '2025-11-15',
                         'changes' => [
-                            'Added AI-powered smart tag suggestions',
-                            'Improved real-time trend analysis performance',
-                            'Enhanced mobile responsive design',
-                        ],
-                    ],
-                    [
-                        'id' => '2',
-                        'version' => 'v2.4.0',
-                        'date' => '2025-10-28',
-                        'changes' => [
-                            'Added hashtag analytics dashboard',
-                            'Implemented tag history tracking',
-                            'Fixed minor UI bugs',
-                        ],
-                    ],
-                    [
-                        'id' => '3',
-                        'version' => 'v2.3.0',
-                        'date' => '2025-10-15',
-                        'changes' => [
-                            'Improved search performance',
-                            'Added export functionality for tag data',
-                            'Updated UI with Italian-inspired design',
-                        ],
-                    ],
-                    [
-                        'id' => '4',
-                        'version' => 'v2.2.0',
-                        'date' => '2025-09-30',
-                        'changes' => [
-                            'Added multi-language support',
-                            'Enhanced tag recommendation algorithm',
-                            'Improved accessibility features',
-                        ],
-                    ],
-                    [
-                        'id' => '5',
-                        'version' => 'v2.1.0',
-                        'date' => '2025-09-15',
-                        'changes' => [
-                            'Initial release of trending analysis',
-                            'Added user preference settings',
-                            'Performance optimizations',
+                            'サイトリリース',
+                            '「タレント別 ハッシュタグ投稿/検索 サポート」機能を追加',
                         ],
                     ],
                 ],
@@ -119,7 +78,7 @@ class HomeController extends Controller
                     'title' => 'ときのそら　New Year\'s Party 2026「Dreams in Motion」',
                     'content' => 'ときのそら　新年最初のライブイベント',
                     'startDate' => '2025-11-15',
-                    'endDate' => '2025-12-31',
+                    'endDate' => '2025-11-16',
                 ],
             ],
         ];
