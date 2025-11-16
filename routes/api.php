@@ -1,5 +1,6 @@
 <?php
 
+use App\Apis\Home\HomeController;
 use App\Apis\Life\LifeScheduleDayTaskController;
 use App\Apis\Life\LifeScheduleMonthTaskController;
 use App\Apis\Sync\Life\LifeScheduleController;
@@ -40,3 +41,15 @@ Route::get('/life/schedule-month/tasks/{yearMonth}', [LifeScheduleMonthTaskContr
  */
 // GET:Sync-生活スケジュール同期API（外部サーバー連携用・ページング対応）
 Route::get('/sync/life/schedule', [LifeScheduleController::class, 'index']);
+
+/*
+ * --------------------------------------------------------------------------
+ * ホーム画面
+ * --------------------------------------------------------------------------
+ */
+// GET:ホーム-機能一覧取得API
+Route::get('/home/features', [HomeController::class, 'features']);
+// GET:ホーム-更新履歴取得API
+Route::get('/home/change-logs', [HomeController::class, 'changeLogs']);
+// GET:ホーム-期間限定トピック取得API
+Route::get('/home/limited-time-topic', [HomeController::class, 'limitedTimeTopic']);
