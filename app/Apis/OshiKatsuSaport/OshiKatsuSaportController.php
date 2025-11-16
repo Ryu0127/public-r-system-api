@@ -95,33 +95,33 @@ class OshiKatsuSaportController extends Controller
                     ],
                     [
                         'id' => 3,
-                        'tag' => 'soraArt',
-                        'description' => 'ファンアート',
+                        'tag' => 'ときのそらスペース',
+                        'description' => 'Twitterスペース',
                     ],
                     [
                         'id' => 4,
-                        'tag' => 'そらArt',
-                        'description' => 'ファンアート',
-                    ],
-                    [
-                        'id' => 5,
-                        'tag' => 'ときのそら聞いたよ',
-                        'description' => 'ボイス感想',
-                    ],
-                    [
-                        'id' => 6,
                         'tag' => 'ときのそらFC',
                         'description' => 'ファンクラブ限定放送',
                     ],
                     [
+                        'id' => 5,
+                        'tag' => 'soraArt',
+                        'description' => 'ファンアート',
+                    ],
+                    [
+                        'id' => 6,
+                        'tag' => 'そらArt',
+                        'description' => 'ファンアート',
+                    ],
+                    [
                         'id' => 7,
-                        'tag' => 'ときのそらと一緒',
-                        'description' => 'ぬいぐるみ・ホロリー写真投稿用',
+                        'tag' => 'ときのそら聞いたよ',
+                        'description' => 'ボイス感想',
                     ],
                     [
                         'id' => 8,
-                        'tag' => 'ときのそらスペース',
-                        'description' => 'Twitterスペース',
+                        'tag' => 'ときのそらと一緒',
+                        'description' => 'ぬいぐるみ・ホロリー写真投稿用',
                     ],
                     [
                         'id' => 9,
