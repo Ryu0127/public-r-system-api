@@ -95,13 +95,13 @@ class OshiKatsuSaportController extends Controller
                     ],
                     [
                         'id' => 3,
-                        'tag' => 'ときのそらスペース',
-                        'description' => 'Twitterスペース',
+                        'tag' => 'ときのそらFC',
+                        'description' => 'ファンクラブ限定配信',
                     ],
                     [
                         'id' => 4,
-                        'tag' => 'ときのそらFC',
-                        'description' => 'ファンクラブ限定配信',
+                        'tag' => 'ときのそらスペース',
+                        'description' => 'Twitterスペース',
                     ],
                     [
                         'id' => 5,
