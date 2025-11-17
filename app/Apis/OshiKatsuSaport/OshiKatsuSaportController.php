@@ -91,7 +91,7 @@ class OshiKatsuSaportController extends Controller
                     [
                         'id' => 2,
                         'tag' => 'ときのそら生放送',
-                        'description' => '生放送',
+                        'description' => '通常配信',
                     ],
                     [
                         'id' => 3,
@@ -101,7 +101,7 @@ class OshiKatsuSaportController extends Controller
                     [
                         'id' => 4,
                         'tag' => 'ときのそらFC',
-                        'description' => 'ファンクラブ限定放送',
+                        'description' => 'ファンクラブ限定配信',
                     ],
                     [
                         'id' => 5,
@@ -154,40 +154,45 @@ class OshiKatsuSaportController extends Controller
                     [
                         'id' => 2,
                         'tag' => 'ロボ子生放送',
-                        'description' => '生放送',
+                        'description' => '通常配信',
                     ],
                     [
                         'id' => 3,
+                        'tag' => '秘密のロボ子さん',
+                        'description' => 'メンバー限定配信',
+                    ],
+                    [
+                        'id' => 4,
                         'tag' => 'RBCSPACE',
                         'description' => 'Twitterスペース',
                     ],
                     [
-                        'id' => 4,
+                        'id' => 5,
                         'tag' => 'ロボ子Art',
                         'description' => 'ファンアート',
                     ],
                     [
-                        'id' => 5,
+                        'id' => 6,
                         'tag' => '聴いたよロボ子さん',
                         'description' => 'ボイス感想',
                     ],
                     [
-                        'id' => 6,
+                        'id' => 7,
                         'tag' => 'みてみてろぼろぼ',
                         'description' => 'ぬいぐるみ・推し活写真投稿用',
                     ],
                     [
-                        'id' => 7,
+                        'id' => 8,
                         'tag' => 'ロボ子レクション',
                         'description' => '切り抜き',
                     ],
                     [
-                        'id' => 8,
+                        'id' => 9,
                         'tag' => 'カスタムロボ子さん',
                         'description' => '配信提供素材',
                     ],
                     [
-                        'id' => 9,
+                        'id' => 10,
                         'tag' => 'RBNAIL',
                         'description' => 'ろぼさー作サムネ',
                     ],
