@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Repositories\MstUserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -44,7 +45,7 @@ class AuthService
      * @param string $password
      * @return array ['success' => bool, 'message' => string, 'user' => array|null, 'warning' => bool, 'attempts' => int]
      */
-    public function login(string $email, string $password): array
+    public function login(string $email, string $password, MstUserRepository $mstUserRepository): array
     {
         // ロック状態をチェック
         $lockCheck = $this->checkAccountLock($email);
@@ -53,9 +54,9 @@ class AuthService
         }
 
         // ユーザー検索
-        $user = $this->findUserByEmail($email);
+        $mstUser = $mstUserRepository->findByMailAddress($email);
 
-        if (!$user) {
+        if (!$mstUser) {
             $this->incrementLoginAttempts($email);
             $attempts = $this->getLoginAttempts($email);
 
@@ -69,7 +70,7 @@ class AuthService
         }
 
         // パスワード検証
-        if (!Hash::check($password, $user['password'])) {
+        if (!Hash::check($password, $mstUser['password'])) {
             $this->incrementLoginAttempts($email);
             $attempts = $this->getLoginAttempts($email);
 
@@ -101,9 +102,9 @@ class AuthService
             'success' => true,
             'message' => 'ログインに成功しました',
             'user' => [
-                'id' => $user['id'],
-                'email' => $user['email'],
-                'name' => $user['name'],
+                'id' => $mstUser['id'],
+                'email' => $mstUser['mail_address'],
+                'name' => $mstUser['user_name'],
             ],
             'warning' => false,
             'attempts' => 0,

@@ -4,6 +4,8 @@ namespace App\Apis\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
+use App\Repositories\TblAuthTokenRepository;
+use App\Repositories\MstUserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -12,10 +14,14 @@ use Illuminate\Support\Str;
 class LoginController extends Controller
 {
     private $authService;
+    private $mstUserRepository;
+    private $tblAuthTokenRepository;
 
     public function __construct()
     {
         $this->authService = new AuthService();
+        $this->mstUserRepository = new MstUserRepository();
+        $this->tblAuthTokenRepository = new TblAuthTokenRepository();
     }
 
     /**
@@ -49,7 +55,8 @@ class LoginController extends Controller
         // ログイン処理
         $result = $this->authService->login(
             $request->input('email'),
-            $request->input('password')
+            $request->input('password'),
+            $this->mstUserRepository
         );
 
         // ログイン失敗
@@ -78,6 +85,18 @@ class LoginController extends Controller
         // ログイン成功 - 認証トークンと自動ログイントークンを生成
         $authToken = Str::random(60); // Sanctumの代わりに簡易的なトークン生成
         $autoLoginToken = $this->authService->generateAutoLoginToken($result['user']['id']);
+
+        // DB登録（認証トークン）
+        $entity = [
+            'auth_token' => $authToken,
+            'user_id' => $result['user']['id'],
+            'expiration_date' => now()->addMinutes(5),
+            'created_program_name' => 'LoginController',
+            'created_datetime' => now(),
+            'updated_program_name' => 'LoginController',
+            'updated_datetime' => now(),
+        ];
+        $this->tblAuthTokenRepository->insert($entity);
 
         return response()->json([
             'status' => true,
