@@ -1,5 +1,8 @@
 <?php
 
+use App\Apis\Auth\LoginController;
+use App\Apis\Auth\AutoLoginController;
+use App\Apis\Auth\LogoutController;
 use App\Apis\Home\HomeController;
 use App\Apis\Life\LifeScheduleDayTaskController;
 use App\Apis\Life\LifeScheduleMonthTaskController;
@@ -22,6 +25,18 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+/*
+ * --------------------------------------------------------------------------
+ * 認証システム
+ * --------------------------------------------------------------------------
+ */
+// POST:認証-ログイン（メールアドレス+パスワード認証）
+Route::post('/auth/login', [LoginController::class, 'doLogin']);
+// POST:認証-自動ログイン（自動ログイントークン認証）
+Route::post('/auth/auto-login', [AutoLoginController::class, 'doAutoLogin']);
+// POST:認証-ログアウト（自動ログイントークン無効化）
+Route::post('/auth/logout', [LogoutController::class, 'doLogout']);
 
 /*
  * --------------------------------------------------------------------------
