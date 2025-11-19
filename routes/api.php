@@ -43,12 +43,15 @@ Route::post('/auth/logout', [LogoutController::class, 'doLogout']);
  * 生活管理システム
  * --------------------------------------------------------------------------
  */
-// GET:LifeSystem-日次スケジュールタスク（データ取得API）
-Route::get('/life/schedule-day/tasks/{date}', [LifeScheduleDayTaskController::class, 'index']);
-// POST:LifeSystem-日次スケジュールタスク（データ更新API）
-Route::post('/life/schedule-day/tasks', [LifeScheduleDayTaskController::class, 'doUpdate']);
-// GET:LifeSystem-月次スケジュールタスク（データ取得API）
-Route::get('/life/schedule-month/tasks/{yearMonth}', [LifeScheduleMonthTaskController::class, 'index']);
+// トークン認証が必要なルート
+Route::middleware('auth.token')->group(function () {
+    // GET:LifeSystem-日次スケジュールタスク（データ取得API）
+    Route::get('/life/schedule-day/tasks/{date}', [LifeScheduleDayTaskController::class, 'index']);
+    // POST:LifeSystem-日次スケジュールタスク（データ更新API）
+    Route::post('/life/schedule-day/tasks', [LifeScheduleDayTaskController::class, 'doUpdate']);
+    // GET:LifeSystem-月次スケジュールタスク（データ取得API）
+    Route::get('/life/schedule-month/tasks/{yearMonth}', [LifeScheduleMonthTaskController::class, 'index']);
+});
 
 /*
  * --------------------------------------------------------------------------
