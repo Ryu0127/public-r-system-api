@@ -17,6 +17,16 @@ class TblAuthTokenRepository
     }
 
     /**
+     * 1件取得（トークンで検索）
+     * @param  string $token
+     * @return TblAuthToken|null
+     */
+    public function findByToken($token)
+    {
+        return TblAuthToken::where('auth_token', $token)->first();
+    }
+
+    /**
      * 複数件取得（全件）
      */
     public function all()
