@@ -4,9 +4,15 @@ namespace App\Apis\OshiKatsuSaport;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use App\Repositories\MstTalentRepository;
 
 class OshiKatsuSaportController extends Controller
 {
+    private $mstTalentRepository;
+    public function __construct() {
+        $this->mstTalentRepository = new MstTalentRepository();
+    }
+
     /**
      * タレント一覧取得API
      * GET /oshi-katsu-saport/talents
@@ -15,46 +21,41 @@ class OshiKatsuSaportController extends Controller
      */
     public function talents(): JsonResponse
     {
+        $mstTalents = $this->mstTalentRepository->all();
         $responseData = [
             'status' => true,
             'data' => [
-                'talents' => [
-                    [
-                        'id' => '1',
-                        'key' => 'tokinosora',
-                        'name' => 'ときのそら（Tokino Sora）',
-                    ],
-                    [
-                        'id' => '2',
-                        'key' => 'roboco',
-                        'name' => 'ロボ子さん（Robocosan）',
-                    ],
-                ],
+                'talents' => $mstTalents->map(function ($mstTalent) {
+                    return [
+                        'id' => $mstTalent->id,
+                        'talentName' => $mstTalent->talent_name,
+                        'talentNameEn' => $mstTalent->talent_name_en,
+                    ];
+                }),
             ],
         ];
-
         return response()->json($responseData);
     }
 
     /**
      * タレント別ハッシュタグ取得API
-     * GET /oshi-katsu-saport/talents/{talentKey}/hashtags
+     * GET /oshi-katsu-saport/talents/{id}/hashtags
      *
-     * @param string $talentKey
+     * @param string $id
      * @return JsonResponse
      */
-    public function talentHashtags(string $talentKey): JsonResponse
+    public function talentHashtags(string $id): JsonResponse
     {
         $talentHashtagsData = $this->getTalentHashtagsData();
 
-        if (!isset($talentHashtagsData[$talentKey])) {
+        if (!isset($talentHashtagsData[$id])) {
             return response()->json([
                 'status' => false,
                 'message' => 'Talent not found',
             ], 404);
         }
 
-        $talentData = $talentHashtagsData[$talentKey];
+        $talentData = $talentHashtagsData[$id];
 
         $responseData = [
             'status' => true,
@@ -76,7 +77,7 @@ class OshiKatsuSaportController extends Controller
     private function getTalentHashtagsData(): array
     {
         return [
-            'tokinosora' => [
+            '1' => [
                 'talent' => [
                     'id' => '1',
                     'key' => 'tokinosora',
@@ -139,7 +140,7 @@ class OshiKatsuSaportController extends Controller
                     ],
                 ],
             ],
-            'roboco' => [
+            '2' => [
                 'talent' => [
                     'id' => '2',
                     'key' => 'roboco',

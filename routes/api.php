@@ -81,4 +81,4 @@ Route::get('/home/limited-time-topic', [HomeController::class, 'limitedTimeTopic
 // GET:推し活サポート-タレント一覧取得API
 Route::get('/oshi-katsu-saport/talents', [OshiKatsuSaportController::class, 'talents']);
 // GET:推し活サポート-タレント別ハッシュタグ取得API
-Route::get('/oshi-katsu-saport/talents/{talentKey}/hashtags', [OshiKatsuSaportController::class, 'talentHashtags']);
+Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportController::class, 'talentHashtags']);
