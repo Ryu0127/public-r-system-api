@@ -5,12 +5,28 @@ namespace App\Apis\OshiKatsuSaport;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use App\Repositories\MstTalentRepository;
+use App\Repositories\MstTalentHashtagRepository;
+use App\Repositories\MstEventTypeRepository;
+use App\Repositories\TblEventCastTalentRepository;
+use App\Repositories\TblEventRepository;
+use App\Repositories\TblEventHashtagRepository;
 
 class OshiKatsuSaportController extends Controller
 {
     private $mstTalentRepository;
+    private $mstTalentHashtagRepository;
+    private $mstEventTypeRepository;
+    private $tblEventCastTalentRepository;
+    private $tblEventRepository;
+    private $tblEventHashtagRepository;
+
     public function __construct() {
         $this->mstTalentRepository = new MstTalentRepository();
+        $this->mstTalentHashtagRepository = new MstTalentHashtagRepository();
+        $this->mstEventTypeRepository = new MstEventTypeRepository();
+        $this->tblEventCastTalentRepository = new TblEventCastTalentRepository();
+        $this->tblEventRepository = new TblEventRepository();
+        $this->tblEventHashtagRepository = new TblEventHashtagRepository();
     }
 
     /**
@@ -46,23 +62,40 @@ class OshiKatsuSaportController extends Controller
      */
     public function talentHashtags(string $id): JsonResponse
     {
-        $talentHashtagsData = $this->getTalentHashtagsData();
-
-        if (!isset($talentHashtagsData[$id])) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Talent not found',
-            ], 404);
-        }
-
-        $talentData = $talentHashtagsData[$id];
+        $mstTalent = $this->mstTalentRepository->findPk($id);
+        $mstTalentHashtags = $this->mstTalentHashtagRepository->getByTalentId($id);
+        $mstEventTypes = $this->mstEventTypeRepository->all();
+        $tblEventCastTalents = $this->tblEventCastTalentRepository->getByTalentId($id);
+        $tblEvents = $this->tblEventRepository->getByPkIds($tblEventCastTalents->pluck('event_id')->toArray());
+        $tblEventHashtags = $this->tblEventHashtagRepository->getByEventIds($tblEvents->pluck('id')->toArray());
 
         $responseData = [
             'status' => true,
             'data' => [
-                'talent' => $talentData['talent'],
-                'hashtags' => $talentData['hashtags'],
-                'eventHashtags' => $talentData['eventHashtags'],
+                'talent' => [
+                    'id' => $mstTalent->id,
+                    'name' => $mstTalent->talent_name,
+                ],
+                'hashtags' => $mstTalentHashtags->map(function ($mstTalentHashtag) {
+                    return [
+                        'id' => $mstTalentHashtag->id,
+                        'tag' => $mstTalentHashtag->hashtag,
+                        'description' => $mstTalentHashtag->description,
+                    ];
+                }),
+                'eventHashtags' => $tblEvents->map(function ($tblEvent) use ($mstEventTypes, $tblEventHashtags) {
+                    return [
+                        'id' => $tblEvent->id,
+                        'startDate' => $tblEvent->event_start_date,
+                        'endDate' => $tblEvent->event_end_date,
+                        'startTime' => $tblEvent->start_time,
+                        'endTime' => $tblEvent->end_time,
+                        'type' => $mstEventTypes->where('id', $tblEvent->event_type_id)->first()->event_type_name,
+                        'eventName' => $tblEvent->event_name,
+                        'url' => $tblEvent->event_url,
+                        'tag' => $tblEventHashtags->where('event_id', $tblEvent->id)->pluck('hashtag')->implode(','),
+                    ];
+                }),
             ],
         ];
 
@@ -80,7 +113,6 @@ class OshiKatsuSaportController extends Controller
             '1' => [
                 'talent' => [
                     'id' => '1',
-                    'key' => 'tokinosora',
                     'name' => 'ときのそら',
                 ],
                 'hashtags' => [
@@ -143,7 +175,6 @@ class OshiKatsuSaportController extends Controller
             '2' => [
                 'talent' => [
                     'id' => '2',
-                    'key' => 'roboco',
                     'name' => 'ロボ子さん',
                 ],
                 'hashtags' => [

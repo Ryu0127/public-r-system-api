@@ -2,9 +2,9 @@
 
 namespace App\Repositories;
 
-use App\Models\MstTalent;
+use App\Models\TblEventHashtag;
 
-class MstTalentRepository
+class TblEventHashtagRepository
 {
     /**
      * 1件取得（主キー抽出）
@@ -12,8 +12,8 @@ class MstTalentRepository
      */
     public function findPk($id)
     {
-        $query = MstTalent::where('id', $id);
-        return $query->first();
+        $query = TblEventHashtag::where('id', $id);
+        return $query->find();
     }
 
     /**
@@ -21,7 +21,13 @@ class MstTalentRepository
      */
     public function all()
     {
-        return MstTalent::get();
+        return TblEventHashtag::get();
+    }
+
+    public function getByEventIds($eventIds)
+    {
+        $query = TblEventHashtag::whereIn('event_id', $eventIds);
+        return $query->get();
     }
 
     /**
@@ -32,7 +38,7 @@ class MstTalentRepository
      */
     public function paginate($object, int $perPage)
     {
-        return MstTalent::paginate($perPage);
+        return TblEventHashtag::paginate($perPage);
     }
 
     /**
@@ -41,7 +47,7 @@ class MstTalentRepository
      */
     public function insert($object)
     {
-        return MstTalent::create($this->generateEntityByAllColume($object));
+        return TblEventHashtag::create($this->generateEntityByAllColume($object));
     }
 
     /**
@@ -75,8 +81,8 @@ class MstTalentRepository
     {
         return [
             'id' => $object->id,
-            'talent_name' => $object->talent_name,
-            'talent_name_en' => $object->talent_name_en,
+            'event_id' => $object->event_id,
+            'hashtag' => $object->hashtag,
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];

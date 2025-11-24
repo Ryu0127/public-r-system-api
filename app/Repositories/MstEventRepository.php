@@ -2,9 +2,9 @@
 
 namespace App\Repositories;
 
-use App\Models\MstTalent;
+use App\Models\MstEvent;
 
-class MstTalentRepository
+class MstEventRepository
 {
     /**
      * 1件取得（主キー抽出）
@@ -12,8 +12,8 @@ class MstTalentRepository
      */
     public function findPk($id)
     {
-        $query = MstTalent::where('id', $id);
-        return $query->first();
+        $query = MstEvent::where('id', $id);
+        return $query->find();
     }
 
     /**
@@ -21,7 +21,7 @@ class MstTalentRepository
      */
     public function all()
     {
-        return MstTalent::get();
+        return MstEvent::get();
     }
 
     /**
@@ -32,7 +32,7 @@ class MstTalentRepository
      */
     public function paginate($object, int $perPage)
     {
-        return MstTalent::paginate($perPage);
+        return MstEvent::paginate($perPage);
     }
 
     /**
@@ -41,7 +41,7 @@ class MstTalentRepository
      */
     public function insert($object)
     {
-        return MstTalent::create($this->generateEntityByAllColume($object));
+        return MstEvent::create($this->generateEntityByAllColume($object));
     }
 
     /**
@@ -75,8 +75,17 @@ class MstTalentRepository
     {
         return [
             'id' => $object->id,
-            'talent_name' => $object->talent_name,
-            'talent_name_en' => $object->talent_name_en,
+            'event_name' => $object->event_name,
+            'event_start_date' => $object->event_start_date,
+            'event_end_date' => $object->event_end_date,
+            'start_time' => $object->start_time,
+            'end_time' => $object->end_time,
+            'location' => $object->location,
+            'address' => $object->address,
+            'latitude' => $object->latitude,
+            'longitude' => $object->longitude,
+            'station' => $object->station,
+            'event_url' => $object->event_url,
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];

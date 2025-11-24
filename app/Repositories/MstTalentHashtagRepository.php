@@ -2,9 +2,9 @@
 
 namespace App\Repositories;
 
-use App\Models\MstTalent;
+use App\Models\MstTalentHashtag;
 
-class MstTalentRepository
+class MstTalentHashtagRepository
 {
     /**
      * 1件取得（主キー抽出）
@@ -12,8 +12,14 @@ class MstTalentRepository
      */
     public function findPk($id)
     {
-        $query = MstTalent::where('id', $id);
-        return $query->first();
+        $query = MstTalentHashtag::where('id', $id);
+        return $query->find();
+    }
+
+    public function getByTalentId($talentId)
+    {
+        $query = MstTalentHashtag::where('talent_id', $talentId);
+        return $query->get();
     }
 
     /**
@@ -21,7 +27,7 @@ class MstTalentRepository
      */
     public function all()
     {
-        return MstTalent::get();
+        return MstTalentHashtag::get();
     }
 
     /**
@@ -32,7 +38,7 @@ class MstTalentRepository
      */
     public function paginate($object, int $perPage)
     {
-        return MstTalent::paginate($perPage);
+        return MstTalentHashtag::paginate($perPage);
     }
 
     /**
@@ -41,7 +47,7 @@ class MstTalentRepository
      */
     public function insert($object)
     {
-        return MstTalent::create($this->generateEntityByAllColume($object));
+        return MstTalentHashtag::create($this->generateEntityByAllColume($object));
     }
 
     /**
@@ -75,8 +81,10 @@ class MstTalentRepository
     {
         return [
             'id' => $object->id,
-            'talent_name' => $object->talent_name,
-            'talent_name_en' => $object->talent_name_en,
+            'talent_id' => $object->talent_id,
+            'hashtag_type_id' => $object->hashtag_type_id,
+            'hashtag' => $object->hashtag,
+            'description' => $object->description,
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];
