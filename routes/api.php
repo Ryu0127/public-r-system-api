@@ -31,19 +31,22 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
  * 認証システム
  * --------------------------------------------------------------------------
  */
-// POST:認証-ログイン（メールアドレス+パスワード認証）
-Route::post('/auth/login', [LoginController::class, 'doLogin']);
-// POST:認証-自動ログイン（自動ログイントークン認証）
-Route::post('/auth/auto-login', [AutoLoginController::class, 'doAutoLogin']);
-// POST:認証-ログアウト（自動ログイントークン無効化）
-Route::post('/auth/logout', [LogoutController::class, 'doLogout']);
+// ドメイン制限ルート
+Route::middleware(['check.origin'])->group(function () {
+    // POST:認証-ログイン（メールアドレス+パスワード認証）
+    Route::post('/auth/login', [LoginController::class, 'doLogin']);
+    // POST:認証-自動ログイン（自動ログイントークン認証）
+    Route::post('/auth/auto-login', [AutoLoginController::class, 'doAutoLogin']);
+    // POST:認証-ログアウト（自動ログイントークン無効化）
+    Route::post('/auth/logout', [LogoutController::class, 'doLogout']);
+});
 
 /*
  * --------------------------------------------------------------------------
  * 生活管理システム
  * --------------------------------------------------------------------------
  */
-// トークン認証とドメイン制限が必要なルート
+// トークン認証 + ドメイン制限ルート
 Route::middleware(['auth.token', 'check.origin'])->group(function () {
     // GET:LifeSystem-日次スケジュールタスク（データ取得API）
     Route::get('/life/schedule-day/tasks/{date}', [LifeScheduleDayTaskController::class, 'index']);
