@@ -34,9 +34,31 @@ class CheckAllowedOrigin
         // リクエストのOriginヘッダーを取得
         $origin = $request->header('Origin');
 
-        // Originヘッダーがない場合（ブラウザ以外からのリクエストなど）は許可
+        // Originヘッダーがない場合はRefererヘッダーをチェック
         if (empty($origin)) {
-            return $next($request);
+            $referer = $request->header('Referer');
+
+            if (empty($referer)) {
+                // OriginもRefererもない場合は拒否
+                return response()->json([
+                    'status' => false,
+                    'message' => 'このドメインからのアクセスは許可されていません',
+                ], 403);
+            }
+
+            // RefererからオリジンURLを抽出
+            $parsedUrl = parse_url($referer);
+            if (!$parsedUrl || !isset($parsedUrl['scheme']) || !isset($parsedUrl['host'])) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'このドメインからのアクセスは許可されていません',
+                ], 403);
+            }
+
+            $origin = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+            if (isset($parsedUrl['port']) && !in_array($parsedUrl['port'], [80, 443])) {
+                $origin .= ':' . $parsedUrl['port'];
+            }
         }
 
         // 末尾のスラッシュを削除して比較
