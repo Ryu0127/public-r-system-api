@@ -43,8 +43,8 @@ Route::post('/auth/logout', [LogoutController::class, 'doLogout']);
  * 生活管理システム
  * --------------------------------------------------------------------------
  */
-// トークン認証が必要なルート
-Route::middleware('auth.token')->group(function () {
+// トークン認証とドメイン制限が必要なルート
+Route::middleware(['auth.token', 'check.origin'])->group(function () {
     // GET:LifeSystem-日次スケジュールタスク（データ取得API）
     Route::get('/life/schedule-day/tasks/{date}', [LifeScheduleDayTaskController::class, 'index']);
     // POST:LifeSystem-日次スケジュールタスク（データ更新API）
