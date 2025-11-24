@@ -20,16 +20,16 @@ class CheckAllowedOrigin
      */
     public function handle(Request $request, Closure $next)
     {
-        // 環境変数から許可するドメインを取得
-        $allowedOriginsEnv = env('ALLOWED_ORIGINS');
+        // 設定ファイルから許可するドメインを取得
+        $allowedOriginsConfig = config('cors.allowed_origins_for_restriction');
 
         // 許可ドメインが設定されていない場合は、全てのドメインを許可
-        if (empty($allowedOriginsEnv)) {
+        if (empty($allowedOriginsConfig)) {
             return $next($request);
         }
 
         // カンマ区切りで複数ドメインに対応
-        $allowedOrigins = array_map('trim', explode(',', $allowedOriginsEnv));
+        $allowedOrigins = array_map('trim', explode(',', $allowedOriginsConfig));
 
         // リクエストのOriginヘッダーを取得
         $origin = $request->header('Origin');

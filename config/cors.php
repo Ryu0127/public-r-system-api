@@ -31,4 +31,16 @@ return [
 
     'supports_credentials' => false,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Allowed Origins for Domain Restriction
+    |--------------------------------------------------------------------------
+    |
+    | 特定のAPIエンドポイントに対してドメイン制限を適用する際に使用します。
+    | カンマ区切りで複数のドメインを指定できます。
+    | 例: http://localhost:3000,https://example.com
+    |
+    */
+    'allowed_origins_for_restriction' => env('ALLOWED_ORIGINS', ''),
+
 ];
