@@ -36,10 +36,18 @@ class CheckAllowedOrigin
 
         // Originヘッダーがない場合はRefererヘッダーをチェック
         if (empty($origin)) {
+            // Authorizationヘッダー（Bearerトークン）がある場合は、Origin/Refererチェックをスキップ
+            // モバイルアプリなど、Origin/Refererヘッダーを送信しないクライアント向け
+            $authorizationHeader = $request->header('Authorization');
+            if (!empty($authorizationHeader) && str_starts_with($authorizationHeader, 'Bearer ')) {
+                // トークン認証を使用するため、ドメイン制限をスキップ
+                return $next($request);
+            }
+
             $referer = $request->header('Referer');
 
             if (empty($referer)) {
-                // OriginもRefererもない場合は拒否
+                // OriginもRefererもAuthorizationもない場合は拒否
                 return response()->json([
                     'status' => false,
                     'message' => 'このドメインからのアクセスは許可されていません',
