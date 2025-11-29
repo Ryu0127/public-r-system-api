@@ -31,11 +31,6 @@ class CheckAllowedOrigin
         // カンマ区切りで複数ドメインに対応
         $allowedOrigins = array_map('trim', explode(',', $allowedOriginsConfig));
 
-        // リクエストのOriginヘッダーを取得
-        $origin = $request->header('Origin');
-
-        // Originヘッダーがない場合はRefererヘッダーをチェック
-        if (empty($origin)) {
             // Authorizationヘッダー（Bearerトークン）がある場合は、Origin/Refererチェックをスキップ
             // モバイルアプリなど、Origin/Refererヘッダーを送信しないクライアント向け
             $authorizationHeader = $request->header('Authorization');
@@ -43,6 +38,12 @@ class CheckAllowedOrigin
                 // トークン認証を使用するため、ドメイン制限をスキップ
                 return $next($request);
             }
+
+        // リクエストのOriginヘッダーを取得
+        $origin = $request->header('Origin');
+
+        // Originヘッダーがない場合はRefererヘッダーをチェック
+        if (empty($origin)) {
 
             $referer = $request->header('Referer');
 
