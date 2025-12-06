@@ -47,8 +47,8 @@ Route::middleware(['check.origin'])->group(function () {
  * --------------------------------------------------------------------------
  */
 // トークン認証 + ドメイン制限ルート（デバッグのため一時的に無効化）
-// Route::middleware(['auth.token', 'check.origin'])->group(function () {
-Route::middleware(['auth.token'])->group(function () {
+Route::middleware(['auth.token', 'check.origin'])->group(function () {
+// Route::middleware(['auth.token'])->group(function () {
     // GET:LifeSystem-日次スケジュールタスク（データ取得API）
     Route::get('/life/schedule-day/tasks/{date}', [LifeScheduleDayTaskController::class, 'index']);
     // POST:LifeSystem-日次スケジュールタスク（データ更新API）
