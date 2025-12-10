@@ -3,6 +3,7 @@
 use App\Apis\Auth\LoginController;
 use App\Apis\Auth\AutoLoginController;
 use App\Apis\Auth\LogoutController;
+use App\Apis\Events\EventsController;
 use App\Apis\Home\HomeController;
 use App\Apis\Life\LifeScheduleDayTaskController;
 use App\Apis\Life\LifeScheduleMonthTaskController;
@@ -85,3 +86,13 @@ Route::get('/home/limited-time-topic', [HomeController::class, 'limitedTimeTopic
 Route::get('/oshi-katsu-saport/talents', [OshiKatsuSaportController::class, 'talents']);
 // GET:推し活サポート-タレント別ハッシュタグ取得API
 Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportController::class, 'talentHashtags']);
+
+/*
+ * --------------------------------------------------------------------------
+ * イベント管理
+ * --------------------------------------------------------------------------
+ */
+// GET:イベント-イベント一覧取得API
+Route::get('/events', [EventsController::class, 'index']);
+// GET:イベント-イベント詳細取得API
+Route::get('/events/{id}', [EventsController::class, 'show']);
