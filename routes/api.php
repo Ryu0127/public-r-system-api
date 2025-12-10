@@ -93,6 +93,6 @@ Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportControlle
  * --------------------------------------------------------------------------
  */
 // GET:イベント-イベント一覧取得API
-Route::get('/events', [EventsController::class, 'index']);
+Route::get('/admin/events', [EventsController::class, 'index']);
 // GET:イベント-イベント詳細取得API
-Route::get('/events/{id}', [EventsController::class, 'show']);
+Route::get('/admin/events/{id}', [EventsController::class, 'show']);
