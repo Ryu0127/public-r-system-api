@@ -79,22 +79,31 @@ class TblEventRepository
      */
     private function generateEntityByAllColume($object)
     {
-        return [
-            'id' => $object->id,
-            'event_name' => $object->event_name,
-            'event_start_date' => $object->event_start_date,
-            'event_end_date' => $object->event_end_date,
-            'start_time' => $object->start_time,
-            'end_time' => $object->end_time,
-            'location' => $object->location,
-            'address' => $object->address,
-            'latitude' => $object->latitude,
-            'longitude' => $object->longitude,
-            'station' => $object->station,
-            'event_url' => $object->event_url,
-            'created_program_name' => $object->created_program_name,
-            'updated_program_name' => $object->updated_program_name,
+        $entity = [
+            'event_name' => $object->event_name ?? null,
+            'event_start_date' => $object->event_start_date ?? null,
+            'event_end_date' => $object->event_end_date ?? null,
+            'start_time' => $object->start_time ?? null,
+            'end_time' => $object->end_time ?? null,
+            'location' => $object->location ?? null,
+            'address' => $object->address ?? null,
+            'latitude' => $object->latitude ?? null,
+            'longitude' => $object->longitude ?? null,
+            'station' => $object->station ?? null,
+            'event_url' => $object->event_url ?? null,
+            'event_type_id' => $object->event_type_id ?? null,
+            'description' => $object->description ?? null,
+            'note' => $object->note ?? null,
+            'created_datetime' => $object->created_datetime ?? now(),
+            'updated_datetime' => $object->updated_datetime ?? now(),
         ];
+
+        // IDが設定されている場合のみ追加
+        if (isset($object->id)) {
+            $entity['id'] = $object->id;
+        }
+
+        return $entity;
     }
 }
 ?>

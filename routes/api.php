@@ -98,4 +98,6 @@ Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportControlle
     Route::get('/admin/events', [EventsController::class, 'index']);
     // GET:イベント-イベント詳細取得API
     Route::get('/admin/events/{id}', [EventsController::class, 'show']);
+    // POST:イベント-イベント登録API（複数件対応）
+    Route::post('/admin/events', [EventsController::class, 'store']);
 // });
