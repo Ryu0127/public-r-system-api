@@ -143,7 +143,7 @@ class EventsController extends Controller
             'events.*.event_end_date' => 'nullable|date|after_or_equal:events.*.event_start_date',
             'events.*.start_time' => 'nullable|date_format:H:i:s',
             'events.*.end_time' => 'nullable|date_format:H:i:s',
-            'events.*.event_type_id' => 'required|integer|exists:mst_event_type,id',
+            'events.*.event_type_name' => 'required|string|max:255',
             'events.*.description' => 'nullable|string',
             'events.*.location' => 'nullable|string|max:255',
             'events.*.address' => 'nullable|string|max:255',
@@ -152,8 +152,8 @@ class EventsController extends Controller
             'events.*.station' => 'nullable|string|max:255',
             'events.*.event_url' => 'nullable|url|max:255',
             'events.*.note' => 'nullable|string',
-            'events.*.talent_ids' => 'nullable|array',
-            'events.*.talent_ids.*' => 'integer|exists:mst_talent,id',
+            'events.*.talent_names' => 'nullable|array',
+            'events.*.talent_names.*' => 'string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -169,20 +169,37 @@ class EventsController extends Controller
 
         DB::beginTransaction();
         try {
+            // マスターデータを事前に取得
+            $mstEventTypes = $this->mstEventTypeRepository->all();
+            $mstTalents = $this->mstTalentRepository->all();
+
             foreach ($request->events as $index => $eventData) {
                 try {
+                    // イベントタイプ名からIDを取得
+                    $eventType = $mstEventTypes->where('event_type_name', $eventData['event_type_name'])->first();
+                    if (!$eventType) {
+                        throw new \Exception("イベントタイプ '{$eventData['event_type_name']}' が見つかりません");
+                    }
+
                     // イベントデータをオブジェクトに変換
-                    $eventObject = (object) $eventData;
+                    $eventObject = (object) array_merge($eventData, [
+                        'event_type_id' => $eventType->id
+                    ]);
 
                     // イベントを登録
                     $event = $this->tblEventRepository->insert($eventObject);
 
-                    // タレント情報が存在する場合は関連付けを登録
-                    if (isset($eventData['talent_ids']) && is_array($eventData['talent_ids'])) {
-                        foreach ($eventData['talent_ids'] as $talentId) {
+                    // タレント名が存在する場合はIDに変換して関連付けを登録
+                    if (isset($eventData['talent_names']) && is_array($eventData['talent_names'])) {
+                        foreach ($eventData['talent_names'] as $talentName) {
+                            $talent = $mstTalents->where('talent_name', $talentName)->first();
+                            if (!$talent) {
+                                throw new \Exception("タレント '{$talentName}' が見つかりません");
+                            }
+
                             $castTalentObject = (object) [
                                 'event_id' => $event->id,
-                                'talent_id' => $talentId,
+                                'talent_id' => $talent->id,
                                 'created_program_name' => 'API',
                                 'updated_program_name' => 'API',
                             ];
