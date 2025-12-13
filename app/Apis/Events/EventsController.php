@@ -177,13 +177,10 @@ class EventsController extends Controller
                 try {
                     // イベントタイプ名からIDを取得
                     $eventType = $mstEventTypes->where('event_type_name', $eventData['event_type_name'])->first();
-                    if (!$eventType) {
-                        throw new \Exception("イベントタイプ '{$eventData['event_type_name']}' が見つかりません");
-                    }
 
                     // イベントデータをオブジェクトに変換
                     $eventObject = (object) array_merge($eventData, [
-                        'event_type_id' => $eventType->id
+                        'event_type_id' => $eventType ? $eventType->id : null
                     ]);
 
                     // イベントを登録
@@ -193,15 +190,13 @@ class EventsController extends Controller
                     if (isset($eventData['talent_names']) && is_array($eventData['talent_names'])) {
                         foreach ($eventData['talent_names'] as $talentName) {
                             $talent = $mstTalents->where('talent_name', $talentName)->first();
-                            if (!$talent) {
-                                throw new \Exception("タレント '{$talentName}' が見つかりません");
-                            }
+                            if (!$talent) continue;
 
                             $castTalentObject = (object) [
                                 'event_id' => $event->id,
                                 'talent_id' => $talent->id,
-                                'created_program_name' => 'API',
-                                'updated_program_name' => 'API',
+                                'created_datetime' => now(),
+                                'updated_datetime' => now(),
                             ];
                             $this->tblEventCastTalentRepository->insert($castTalentObject);
                         }
