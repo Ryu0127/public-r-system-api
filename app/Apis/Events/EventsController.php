@@ -3,6 +3,7 @@
 namespace App\Apis\Events;
 
 use App\Http\Controllers\Controller;
+use App\Repositories\MstEventTypeRepository;
 use App\Repositories\MstTalentRepository;
 use App\Repositories\TblEventCastTalentRepository;
 use App\Repositories\TblEventRepository;
@@ -10,12 +11,14 @@ use Illuminate\Http\JsonResponse;
 
 class EventsController extends Controller
 {
+    private $mstEventTypeRepository;
     private $mstTalentRepository;
     private $tblEventRepository;
     private $tblEventCastTalentRepository;
 
     public function __construct()
     {
+        $this->mstEventTypeRepository = new MstEventTypeRepository();
         $this->mstTalentRepository = new MstTalentRepository();
         $this->tblEventRepository = new TblEventRepository();
         $this->tblEventCastTalentRepository = new TblEventCastTalentRepository();
@@ -29,14 +32,21 @@ class EventsController extends Controller
      */
     public function index(): JsonResponse
     {
+        $mstEventTypes = $this->mstEventTypeRepository->all();
         $mstTalents = $this->mstTalentRepository->all();
         $tblEvents = $this->tblEventRepository->all();
         $tblEventCastTalents = $this->tblEventCastTalentRepository->all();
         $responseData = [
             'success' => true,
-            'data' => $tblEvents->map(function ($tblEvent) use ($tblEventCastTalents, $mstTalents) {
+            'data' => $tblEvents->map(function ($tblEvent) use ($tblEventCastTalents, $mstTalents, $mstEventTypes) {
+                $eventType = $mstEventTypes->where('id', $tblEvent->event_type_id)->first();
                 $talentIds = $tblEventCastTalents->where('event_id', $tblEvent->id)->pluck('talent_id')->toArray();
                 $talentNames = $mstTalents->whereIn('id', $talentIds)->pluck('talent_name')->toArray();
+
+                $notes = [];
+                if($tblEvent->note) {
+                    $notes = [$tblEvent->note];
+                }
                 return [
                     'id' => $tblEvent->id,
                     'title' => $tblEvent->event_name,
@@ -44,17 +54,14 @@ class EventsController extends Controller
                     'endDate' => $tblEvent->event_end_date,
                     'startTime' => $tblEvent->start_time,
                     'endTime' => $tblEvent->end_time,
-                    'type' => 'goods',
+                    'type' => $eventType->event_type_name,
                     'talentNames' => $talentNames,
                     'description' => $tblEvent->description,
-                    'color' => '#1E90FF',
+                    'color' => $eventType->event_color_code,
                     'url' => $tblEvent->event_url,
-                    'thumbnailUrl' => 'https://placehold.co/800x400/1E90FF/FFFFFF?text=POP+UP+SHOP',
+                    'thumbnailUrl' => $eventType->thumbnail_img_url,
                     'location' => $tblEvent->location,
-                    'notes' => [
-                        '※1月22日は18:00までの営業となります。',
-                        '※一部日時は事前抽選による予約制となります。',
-                    ],
+                    'notes' => $notes,
                     'status' => 'draft',
                     'createdAt' => $tblEvent->created_datetime,
                     'updatedAt' => $tblEvent->updated_datetime,
@@ -76,12 +83,19 @@ class EventsController extends Controller
     public function show(string $id): JsonResponse
     {
         // IDに該当するイベントを検索
+        $mstEventTypes = $this->mstEventTypeRepository->all();
         $mstTalents = $this->mstTalentRepository->all();
         $tblEvent = $this->tblEventRepository->findPk($id);
         $tblEventCastTalents = $this->tblEventCastTalentRepository->all();
 
+        $eventType = $mstEventTypes->where('id', $tblEvent->event_type_id)->first();
         $talentIds = $tblEventCastTalents->where('event_id', $tblEvent->id)->pluck('talent_id')->toArray();
         $talentNames = $mstTalents->whereIn('id', $talentIds)->pluck('talent_name')->toArray();
+
+        $notes = [];
+        if($tblEvent->note) {
+            $notes = [$tblEvent->note];
+        }
 
         $responseData = [
             'success' => true,
@@ -92,17 +106,14 @@ class EventsController extends Controller
                 'endDate' => $tblEvent->event_end_date,
                 'startTime' => $tblEvent->start_time,
                 'endTime' => $tblEvent->end_time,
-                'type' => 'goods',
+                'type' => $eventType->event_type_name,
                 'talentNames' => $talentNames,
                 'description' => $tblEvent->description,
-                'color' => '#1E90FF',
+                'color' => $eventType->event_color_code,
                 'url' => $tblEvent->event_url,
-                'thumbnailUrl' => 'https://placehold.co/800x400/1E90FF/FFFFFF?text=POP+UP+SHOP',
+                'thumbnailUrl' => $eventType->thumbnail_img_url,
                 'location' => $tblEvent->location,
-                'notes' => [
-                    '※1月22日は18:00までの営業となります。',
-                    '※一部日時は事前抽選による予約制となります。',
-                ],
+                'notes' => $notes,
                 'status' => 'draft',
                 'createdAt' => $tblEvent->created_datetime,
                 'updatedAt' => $tblEvent->updated_datetime,
