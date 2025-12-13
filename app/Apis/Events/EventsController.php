@@ -8,6 +8,9 @@ use App\Repositories\MstTalentRepository;
 use App\Repositories\TblEventCastTalentRepository;
 use App\Repositories\TblEventRepository;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class EventsController extends Controller
 {
@@ -121,5 +124,109 @@ class EventsController extends Controller
         ];
 
         return response()->json($responseData);
+    }
+
+    /**
+     * イベント登録API（複数件対応）
+     * POST /events
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        // リクエストデータのバリデーション
+        $validator = Validator::make($request->all(), [
+            'events' => 'required|array|min:1',
+            'events.*.event_name' => 'required|string|max:255',
+            'events.*.event_start_date' => 'required|date',
+            'events.*.event_end_date' => 'nullable|date|after_or_equal:events.*.event_start_date',
+            'events.*.start_time' => 'nullable|date_format:H:i:s',
+            'events.*.end_time' => 'nullable|date_format:H:i:s',
+            'events.*.event_type_id' => 'required|integer|exists:mst_event_type,id',
+            'events.*.description' => 'nullable|string',
+            'events.*.location' => 'nullable|string|max:255',
+            'events.*.address' => 'nullable|string|max:255',
+            'events.*.latitude' => 'nullable|numeric',
+            'events.*.longitude' => 'nullable|numeric',
+            'events.*.station' => 'nullable|string|max:255',
+            'events.*.event_url' => 'nullable|url|max:255',
+            'events.*.note' => 'nullable|string',
+            'events.*.talent_ids' => 'nullable|array',
+            'events.*.talent_ids.*' => 'integer|exists:mst_talent,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'バリデーションエラーが発生しました',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $registeredEvents = [];
+        $errors = [];
+
+        DB::beginTransaction();
+        try {
+            foreach ($request->events as $index => $eventData) {
+                try {
+                    // イベントデータをオブジェクトに変換
+                    $eventObject = (object) $eventData;
+
+                    // イベントを登録
+                    $event = $this->tblEventRepository->insert($eventObject);
+
+                    // タレント情報が存在する場合は関連付けを登録
+                    if (isset($eventData['talent_ids']) && is_array($eventData['talent_ids'])) {
+                        foreach ($eventData['talent_ids'] as $talentId) {
+                            $castTalentObject = (object) [
+                                'event_id' => $event->id,
+                                'talent_id' => $talentId,
+                                'created_program_name' => 'API',
+                                'updated_program_name' => 'API',
+                            ];
+                            $this->tblEventCastTalentRepository->insert($castTalentObject);
+                        }
+                    }
+
+                    $registeredEvents[] = [
+                        'index' => $index,
+                        'id' => $event->id,
+                        'event_name' => $event->event_name,
+                    ];
+                } catch (\Exception $e) {
+                    $errors[] = [
+                        'index' => $index,
+                        'message' => $e->getMessage(),
+                    ];
+                }
+            }
+
+            // エラーがある場合はロールバック
+            if (!empty($errors)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => '一部のイベントの登録に失敗しました',
+                    'errors' => $errors,
+                ], 500);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => count($registeredEvents) . '件のイベントを登録しました',
+                'data' => $registeredEvents,
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'イベントの登録に失敗しました',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
