@@ -3,70 +3,23 @@
 namespace App\Apis\Events;
 
 use App\Http\Controllers\Controller;
+use App\Repositories\MstTalentRepository;
+use App\Repositories\TblEventCastTalentRepository;
+use App\Repositories\TblEventRepository;
 use Illuminate\Http\JsonResponse;
 
 class EventsController extends Controller
 {
-    /**
-     * イベント詳細モックデータ
-     *
-     * @var array
-     */
-    private static $mockEventsData = [
-        [
-            'id' => '1',
-            'title' => 'hololive production OFFICIAL POP UP SHOP',
-            'date' => '2026-01-09',
-            'endDate' => '2026-01-22',
-            'startTime' => '10:00',
-            'endTime' => '20:30',
-            'type' => 'goods',
-            'talentNames' => ['ホロライブプロダクション', 'さくらみこ', '星街すいせい'],
-            'description' => '東京駅一番街 いちばんプラザにてポップアップストアを開催。0期生、hololive Indonesia 1期生、hololive English -Myth-メンバーの「感謝」の花束をモチーフにした描き下ろしイラストグッズを販売。
+    private $mstTalentRepository;
+    private $tblEventRepository;
+    private $tblEventCastTalentRepository;
 
-【営業時間】10:00 〜 20:30
-※1月22日は18:00までの営業となります。
-
-【来場予約について】
-一部日時は事前抽選による予約制となります。
-■事前抽選実施対象日時
-・1月9日（金）10:00～12:00
-・1月10日（土）10:00～12:00
-・1月11日（日）10:00～12:00
-・1月16日（金）10:00～12:00
-・1月17日（土）10:00～12:00
-・1月18日（日）10:00～12:00
-
-【購入者ノベルティ】
-※特典はなくなり次第終了となります。
-クリアカード・ポストカードは、開催期間の前半/後半で絵柄が異なります！
-・前半：1月9日（金）〜1月15日（木）
-・後半：1月16日（金）〜1月22日（木）
-
-① オリジナルショッパー（全1種）
-  11,000円（税込）以上のお買い上げで1点プレゼント
-
-② メッセージカード（全3種/ランダム）
-  1会計ごとに1点プレゼント
-
-③ ポストカード（全11種/ランダム/上限11枚）
-  2,200円（税込）ごとに1点プレゼント
-
-④ クリアカード（全11種/ランダム/上限11枚）
-  5,500円（税込）ごとに1点プレゼント',
-            'color' => '#1E90FF',
-            'url' => 'https://hololive.hololivepro.com/events/popup-2601/',
-            'thumbnailUrl' => 'https://placehold.co/800x400/1E90FF/FFFFFF?text=POP+UP+SHOP',
-            'location' => '東京駅一番街内「いちばんプラザ」',
-            'notes' => [
-                '※1月22日は18:00までの営業となります。',
-                '※一部日時は事前抽選による予約制となります。',
-            ],
-            'status' => 'draft',
-            'createdAt' => '2025-12-01T10:00:00.000Z',
-            'updatedAt' => '2025-12-10T15:30:00.000Z',
-        ],
-    ];
+    public function __construct()
+    {
+        $this->mstTalentRepository = new MstTalentRepository();
+        $this->tblEventRepository = new TblEventRepository();
+        $this->tblEventCastTalentRepository = new TblEventCastTalentRepository();
+    }
 
     /**
      * イベント一覧取得API
@@ -76,9 +29,37 @@ class EventsController extends Controller
      */
     public function index(): JsonResponse
     {
+        $mstTalents = $this->mstTalentRepository->all();
+        $tblEvents = $this->tblEventRepository->all();
+        $tblEventCastTalents = $this->tblEventCastTalentRepository->all();
         $responseData = [
             'success' => true,
-            'data' => self::$mockEventsData,
+            'data' => $tblEvents->map(function ($tblEvent) use ($tblEventCastTalents, $mstTalents) {
+                $talentIds = $tblEventCastTalents->where('event_id', $tblEvent->id)->pluck('talent_id')->toArray();
+                $talentNames = $mstTalents->whereIn('id', $talentIds)->pluck('talent_name')->toArray();
+                return [
+                    'id' => $tblEvent->id,
+                    'title' => $tblEvent->event_name,
+                    'date' => $tblEvent->event_start_date,
+                    'endDate' => $tblEvent->event_end_date,
+                    'startTime' => $tblEvent->start_time,
+                    'endTime' => $tblEvent->end_time,
+                    'type' => 'goods',
+                    'talentNames' => $talentNames,
+                    'description' => $tblEvent->description,
+                    'color' => '#1E90FF',
+                    'url' => $tblEvent->event_url,
+                    'thumbnailUrl' => 'https://placehold.co/800x400/1E90FF/FFFFFF?text=POP+UP+SHOP',
+                    'location' => $tblEvent->location,
+                    'notes' => [
+                        '※1月22日は18:00までの営業となります。',
+                        '※一部日時は事前抽選による予約制となります。',
+                    ],
+                    'status' => 'draft',
+                    'createdAt' => $tblEvent->created_datetime,
+                    'updatedAt' => $tblEvent->updated_datetime,
+                ];
+            }),
             'message' => 'イベント一覧を取得しました',
         ];
 
@@ -95,22 +76,37 @@ class EventsController extends Controller
     public function show(string $id): JsonResponse
     {
         // IDに該当するイベントを検索
-        $event = collect(self::$mockEventsData)->firstWhere('id', $id);
+        $mstTalents = $this->mstTalentRepository->all();
+        $tblEvent = $this->tblEventRepository->findPk($id);
+        $tblEventCastTalents = $this->tblEventCastTalentRepository->all();
 
-        if (!$event) {
-            $responseData = [
-                'success' => false,
-                'data' => null,
-                'error' => "ID: {$id} のイベントが見つかりませんでした",
-            ];
-
-            return response()->json($responseData, 404);
-        }
+        $talentIds = $tblEventCastTalents->where('event_id', $tblEvent->id)->pluck('talent_id')->toArray();
+        $talentNames = $mstTalents->whereIn('id', $talentIds)->pluck('talent_name')->toArray();
 
         $responseData = [
             'success' => true,
-            'data' => $event,
-            'message' => 'イベント詳細を取得しました',
+            'data' => [
+                'id' => $tblEvent->id,
+                'title' => $tblEvent->event_name,
+                'date' => $tblEvent->event_start_date,
+                'endDate' => $tblEvent->event_end_date,
+                'startTime' => $tblEvent->start_time,
+                'endTime' => $tblEvent->end_time,
+                'type' => 'goods',
+                'talentNames' => $talentNames,
+                'description' => $tblEvent->description,
+                'color' => '#1E90FF',
+                'url' => $tblEvent->event_url,
+                'thumbnailUrl' => 'https://placehold.co/800x400/1E90FF/FFFFFF?text=POP+UP+SHOP',
+                'location' => $tblEvent->location,
+                'notes' => [
+                    '※1月22日は18:00までの営業となります。',
+                    '※一部日時は事前抽選による予約制となります。',
+                ],
+                'status' => 'draft',
+                'createdAt' => $tblEvent->created_datetime,
+                'updatedAt' => $tblEvent->updated_datetime,
+            ],
         ];
 
         return response()->json($responseData);

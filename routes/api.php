@@ -92,7 +92,10 @@ Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportControlle
  * イベント管理
  * --------------------------------------------------------------------------
  */
-// GET:イベント-イベント一覧取得API
-Route::get('/admin/events', [EventsController::class, 'index']);
-// GET:イベント-イベント詳細取得API
-Route::get('/admin/events/{id}', [EventsController::class, 'show']);
+// トークン認証 + ドメイン制限ルート
+// Route::middleware(['auth.token', 'check.origin'])->group(function () {
+    // GET:イベント-イベント一覧取得API
+    Route::get('/admin/events', [EventsController::class, 'index']);
+    // GET:イベント-イベント詳細取得API
+    Route::get('/admin/events/{id}', [EventsController::class, 'show']);
+// });

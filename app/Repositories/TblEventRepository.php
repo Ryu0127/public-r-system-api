@@ -13,7 +13,7 @@ class TblEventRepository
     public function findPk($id)
     {
         $query = TblEvent::where('id', $id);
-        return $query->find();
+        return $query->first();
     }
 
     /**
