@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Contexts\Domain\Aggregates\Collection\EventAggregateList;
+use App\Contexts\Domain\Aggregates\EventAggregate;
 use App\Models\TblEvent;
+use Illuminate\Support\Collection;
 
 class TblEventRepository
 {
@@ -19,15 +22,16 @@ class TblEventRepository
     /**
      * 複数件取得（全件）
      */
-    public function all()
+    public function all(): EventAggregateList
     {
-        return TblEvent::get();
+        $entities = TblEvent::get();
+        return $this->createAggregateList($entities);
     }
 
-    public function getByPkIds($ids)
+    public function getByPkIds(array $ids): EventAggregateList
     {
-        $query = TblEvent::whereIn('id', $ids);
-        return $query->get();
+        $entities = TblEvent::whereIn('id', $ids)->get();
+        return $this->createAggregateList($entities);
     }
 
     /**
@@ -104,6 +108,15 @@ class TblEventRepository
         }
 
         return $entity;
+    }
+    
+    private function createAggregateList(Collection $entities): EventAggregateList
+    {
+        $aggregateList = new EventAggregateList(new Collection());
+        foreach ($entities as $entity) {
+            $aggregateList->add(new EventAggregate($entity));
+        }
+        return $aggregateList;
     }
 }
 ?>

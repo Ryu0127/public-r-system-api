@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Contexts\Domain\Aggregates\Collection\TalentAggregateList;
+use App\Contexts\Domain\Aggregates\TalentAggregate;
 use App\Models\MstTalent;
+use Illuminate\Support\Collection;
 
 class MstTalentRepository
 {
@@ -10,18 +13,19 @@ class MstTalentRepository
      * 1件取得（主キー抽出）
      * @param  $id
      */
-    public function findPk($id)
+    public function findPk($id): TalentAggregate
     {
-        $query = MstTalent::where('id', $id);
-        return $query->first();
+        $entity = MstTalent::where('id', $id)->first();
+        return new TalentAggregate($entity);
     }
 
     /**
      * 複数件取得（全件）
      */
-    public function all()
+    public function all(): TalentAggregateList
     {
-        return MstTalent::get();
+        $entities = MstTalent::get();
+        return $this->createAggregateList($entities);
     }
 
     /**
@@ -51,7 +55,7 @@ class MstTalentRepository
      */
     public function updateByPk($object, $id)
     {
-        $model = $this->findPk($id);
+        $model = $this->findPk($id)->getEntity();
         $model->update($this->generateEntityByAllColume($object));
         return $model;
     }
@@ -62,7 +66,7 @@ class MstTalentRepository
      */
     public function deleteByPk($id)
     {
-        $model = $this->findPk($id);
+        $model = $this->findPk($id)->getEntity();
         $model->delete();
         return $model;
     }
@@ -80,6 +84,16 @@ class MstTalentRepository
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];
+    }
+
+
+    private function createAggregateList(Collection $entities): TalentAggregateList
+    {
+        $aggregateList = new TalentAggregateList(new Collection());
+        foreach ($entities as $entity) {
+            $aggregateList->add(new TalentAggregate($entity));
+        }
+        return $aggregateList;
     }
 }
 ?>

@@ -2,11 +2,10 @@
 
 namespace App\Apis\Events;
 
+use App\Contexts\Domain\Aggregates\EventTypeAggregate;
+use App\Contexts\Application\Services\Talent\EventApplicationService;
 use App\Http\Controllers\Controller;
-use App\Repositories\MstEventTypeRepository;
-use App\Repositories\MstTalentRepository;
-use App\Repositories\TblEventCastTalentRepository;
-use App\Repositories\TblEventRepository;
+use App\Models\MstEventType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,17 +13,12 @@ use Illuminate\Support\Facades\Validator;
 
 class EventsController extends Controller
 {
-    private $mstEventTypeRepository;
-    private $mstTalentRepository;
-    private $tblEventRepository;
-    private $tblEventCastTalentRepository;
+    private $eventApplicationService;
 
-    public function __construct()
-    {
-        $this->mstEventTypeRepository = new MstEventTypeRepository();
-        $this->mstTalentRepository = new MstTalentRepository();
-        $this->tblEventRepository = new TblEventRepository();
-        $this->tblEventCastTalentRepository = new TblEventCastTalentRepository();
+    public function __construct(
+        EventApplicationService $eventApplicationService,
+    ) {
+        $this->eventApplicationService = $eventApplicationService;
     }
 
     /**
@@ -35,39 +29,42 @@ class EventsController extends Controller
      */
     public function index(): JsonResponse
     {
-        $mstEventTypes = $this->mstEventTypeRepository->all();
-        $mstTalents = $this->mstTalentRepository->all();
-        $tblEvents = $this->tblEventRepository->all();
-        $tblEventCastTalents = $this->tblEventCastTalentRepository->all();
+        // select
+        $eventAggregateList = $this->eventApplicationService->selectEvent();
+        $eventTypeAggregateList = $this->eventApplicationService->selectEventType();
+        $talentAggregateList = $this->eventApplicationService->selectTalent();
+        $eventCastTalentAggregateList = $this->eventApplicationService->selectEventCastTalent();
+        // response
+        $eventAggregates = $eventAggregateList->getAggregates();
         $responseData = [
             'success' => true,
-            'data' => $tblEvents->map(function ($tblEvent) use ($tblEventCastTalents, $mstTalents, $mstEventTypes) {
-                $eventType = $mstEventTypes->where('id', $tblEvent->event_type_id)->first();
-                $talentIds = $tblEventCastTalents->where('event_id', $tblEvent->id)->pluck('talent_id')->toArray();
-                $talentNames = $mstTalents->whereIn('id', $talentIds)->pluck('talent_name')->toArray();
+            'data' => $eventAggregates->map(function ($eventAggregate) use ($eventCastTalentAggregateList, $talentAggregateList, $eventTypeAggregateList) {
+                $eventTypeAggregate = $eventTypeAggregateList->firstById($eventAggregate->getEntity()->event_type_id) ?? new EventTypeAggregate(new MstEventType());
+                $eventCastTalentAggregateList = $eventCastTalentAggregateList->filterByEventId($eventAggregate->getEntity()->id);
+                $filteredTalentAggregateList = $talentAggregateList->filterById($eventCastTalentAggregateList->getTalentIds());
 
                 $notes = [];
-                if($tblEvent->note) {
-                    $notes = [$tblEvent->note];
+                if($eventAggregate->getEntity()->note) {
+                    $notes = [$eventAggregate->getEntity()->note];
                 }
                 return [
-                    'id' => $tblEvent->id,
-                    'title' => $tblEvent->event_name,
-                    'date' => $tblEvent->event_start_date,
-                    'endDate' => $tblEvent->event_end_date,
-                    'startTime' => $tblEvent->start_time,
-                    'endTime' => $tblEvent->end_time,
-                    'type' => $eventType->event_type_name,
-                    'talentNames' => $talentNames,
-                    'description' => $tblEvent->description,
-                    'color' => $eventType->event_color_code,
-                    'url' => $tblEvent->event_url,
-                    'thumbnailUrl' => $eventType->thumbnail_img_url,
-                    'location' => $tblEvent->location,
+                    'id' => $eventAggregate->getEntity()->id,
+                    'title' => $eventAggregate->getEntity()->event_name,
+                    'date' => $eventAggregate->getEntity()->event_start_date,
+                    'endDate' => $eventAggregate->getEntity()->event_end_date,
+                    'startTime' => $eventAggregate->getEntity()->start_time,
+                    'endTime' => $eventAggregate->getEntity()->end_time,
+                    'type' => $eventTypeAggregate->getEntity()->event_type_name,
+                    'talentNames' => $filteredTalentAggregateList->getTalentNames(),
+                    'description' => $eventAggregate->getEntity()->description,
+                    'color' => $eventTypeAggregate->getEntity()->event_color_code,
+                    'url' => $eventAggregate->getEntity()->event_url,
+                    'thumbnailUrl' => $eventTypeAggregate->getEntity()->thumbnail_img_url,
+                    'location' => $eventAggregate->getEntity()->location,
                     'notes' => $notes,
                     'status' => 'draft',
-                    'createdAt' => $tblEvent->created_datetime,
-                    'updatedAt' => $tblEvent->updated_datetime,
+                    'createdAt' => $eventAggregate->getEntity()->created_datetime,
+                    'updatedAt' => $eventAggregate->getEntity()->updated_datetime,
                 ];
             }),
             'message' => 'イベント一覧を取得しました',
@@ -85,41 +82,37 @@ class EventsController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        // IDに該当するイベントを検索
-        $mstEventTypes = $this->mstEventTypeRepository->all();
-        $mstTalents = $this->mstTalentRepository->all();
-        $tblEvent = $this->tblEventRepository->findPk($id);
-        $tblEventCastTalents = $this->tblEventCastTalentRepository->all();
-
-        $eventType = $mstEventTypes->where('id', $tblEvent->event_type_id)->first();
-        $talentIds = $tblEventCastTalents->where('event_id', $tblEvent->id)->pluck('talent_id')->toArray();
-        $talentNames = $mstTalents->whereIn('id', $talentIds)->pluck('talent_name')->toArray();
-
-        $notes = [];
-        if($tblEvent->note) {
-            $notes = [$tblEvent->note];
-        }
-
+        // select
+        $eventAggregate = $this->eventApplicationService->firstEventById($id);
+        $eventTypeAggregateList = $this->eventApplicationService->selectEventType();
+        $talentAggregateList = $this->eventApplicationService->selectTalent();
+        $eventCastTalentAggregateList = $this->eventApplicationService->selectEventCastTalent();
+        // filter
+        $eventTypeAggregate = $eventTypeAggregateList->firstById($eventAggregate->getEntity()->event_type_id) ?? new EventTypeAggregate(new MstEventType());
+        $eventCastTalentAggregateList = $eventCastTalentAggregateList->filterByEventId($eventAggregate->getEntity()->id);
+        $filteredTalentAggregateList = $talentAggregateList->filterById($eventCastTalentAggregateList->getTalentIds());
+        $notes = $eventAggregate->getEntity()->note ? [$eventAggregate->getEntity()->note] : [];
+        // response
         $responseData = [
             'success' => true,
             'data' => [
-                'id' => $tblEvent->id,
-                'title' => $tblEvent->event_name,
-                'date' => $tblEvent->event_start_date,
-                'endDate' => $tblEvent->event_end_date,
-                'startTime' => $tblEvent->start_time,
-                'endTime' => $tblEvent->end_time,
-                'type' => $eventType->event_type_name,
-                'talentNames' => $talentNames,
-                'description' => $tblEvent->description,
-                'color' => $eventType->event_color_code,
-                'url' => $tblEvent->event_url,
-                'thumbnailUrl' => $eventType->thumbnail_img_url,
-                'location' => $tblEvent->location,
+                'id' => $eventAggregate->getEntity()->id,
+                'title' => $eventAggregate->getEntity()->event_name,
+                'date' => $eventAggregate->getEntity()->event_start_date,
+                'endDate' => $eventAggregate->getEntity()->event_end_date,
+                'startTime' => $eventAggregate->getEntity()->start_time,
+                'endTime' => $eventAggregate->getEntity()->end_time,
+                'type' => $eventTypeAggregate->getEntity()->event_type_name,
+                'talentNames' => $filteredTalentAggregateList->getTalentNames(),
+                'description' => $eventAggregate->getEntity()->description,
+                'color' => $eventTypeAggregate->getEntity()->event_color_code,
+                'url' => $eventAggregate->getEntity()->event_url,
+                'thumbnailUrl' => $eventTypeAggregate->getEntity()->thumbnail_img_url,
+                'location' => $eventAggregate->getEntity()->location,
                 'notes' => $notes,
                 'status' => 'draft',
-                'createdAt' => $tblEvent->created_datetime,
-                'updatedAt' => $tblEvent->updated_datetime,
+                'createdAt' => $eventAggregate->getEntity()->created_datetime,
+                'updatedAt' => $eventAggregate->getEntity()->updated_datetime,
             ],
         ];
 
@@ -170,42 +163,48 @@ class EventsController extends Controller
         DB::beginTransaction();
         try {
             // マスターデータを事前に取得
-            $mstEventTypes = $this->mstEventTypeRepository->all();
-            $mstTalents = $this->mstTalentRepository->all();
+            $eventTypeAggregateList = $this->eventApplicationService->selectEventType();
+            $talentAggregateList = $this->eventApplicationService->selectTalent();
 
             foreach ($request->events as $index => $eventData) {
                 try {
                     // イベントタイプ名からIDを取得
-                    $eventType = $mstEventTypes->where('event_type_name', $eventData['event_type_name'])->first();
+                    $eventTypeAggregates = $eventTypeAggregateList->getAggregates();
+                    $eventTypeAggregate = $eventTypeAggregates->first(function ($aggregate) use ($eventData) {
+                        return $aggregate->getEntity()->event_type_name === $eventData['event_type_name'];
+                    });
 
                     // イベントデータをオブジェクトに変換
                     $eventObject = (object) array_merge($eventData, [
-                        'event_type_id' => $eventType ? $eventType->id : null
+                        'event_type_id' => $eventTypeAggregate ? $eventTypeAggregate->getEntity()->id : null
                     ]);
 
                     // イベントを登録
-                    $event = $this->tblEventRepository->insert($eventObject);
+                    $eventAggregate = $this->eventApplicationService->insertEvent($eventObject);
 
                     // タレント名が存在する場合はIDに変換して関連付けを登録
                     if (isset($eventData['talent_names']) && is_array($eventData['talent_names'])) {
+                        $talentAggregates = $talentAggregateList->getAggregates();
                         foreach ($eventData['talent_names'] as $talentName) {
-                            $talent = $mstTalents->where('talent_name', $talentName)->first();
-                            if (!$talent) continue;
+                            $talentAggregate = $talentAggregates->first(function ($aggregate) use ($talentName) {
+                                return $aggregate->getEntity()->talent_name === $talentName;
+                            });
+                            if (!$talentAggregate) continue;
 
                             $castTalentObject = (object) [
-                                'event_id' => $event->id,
-                                'talent_id' => $talent->id,
+                                'event_id' => $eventAggregate->getEntity()->id,
+                                'talent_id' => $talentAggregate->getEntity()->id,
                                 'created_datetime' => now(),
                                 'updated_datetime' => now(),
                             ];
-                            $this->tblEventCastTalentRepository->insert($castTalentObject);
+                            $this->eventApplicationService->insertEventCastTalent($castTalentObject);
                         }
                     }
 
                     $registeredEvents[] = [
                         'index' => $index,
-                        'id' => $event->id,
-                        'event_name' => $event->event_name,
+                        'id' => $eventAggregate->getEntity()->id,
+                        'event_name' => $eventAggregate->getEntity()->event_name,
                     ];
                 } catch (\Exception $e) {
                     $errors[] = [

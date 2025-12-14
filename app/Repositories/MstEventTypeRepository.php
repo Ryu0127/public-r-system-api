@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Contexts\Domain\Aggregates\Collection\EventTypeAggregateList;
+use App\Contexts\Domain\Aggregates\EventTypeAggregate;
 use App\Models\MstEventType;
+use Illuminate\Support\Collection;
 
 class MstEventTypeRepository
 {
@@ -19,9 +22,10 @@ class MstEventTypeRepository
     /**
      * 複数件取得（全件）
      */
-    public function all()
+    public function all(): EventTypeAggregateList
     {
-        return MstEventType::get();
+        $entities = MstEventType::get();
+        return $this->createAggregateList($entities);
     }
 
     /**
@@ -79,6 +83,15 @@ class MstEventTypeRepository
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];
+    }
+
+    private function createAggregateList(Collection $entities): EventTypeAggregateList
+    {
+        $aggregateList = new EventTypeAggregateList(new Collection());
+        foreach ($entities as $entity) {
+            $aggregateList->add(new EventTypeAggregate($entity));
+        }
+        return $aggregateList;
     }
 }
 ?>

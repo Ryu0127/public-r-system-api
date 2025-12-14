@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Contexts\Domain\Aggregates\Collection\TalentHashtagAggregateList;
+use App\Contexts\Domain\Aggregates\TalentHashtagAggregate;
 use App\Models\MstTalentHashtag;
+use Illuminate\Support\Collection;
 
 class MstTalentHashtagRepository
 {
@@ -10,24 +13,25 @@ class MstTalentHashtagRepository
      * 1件取得（主キー抽出）
      * @param  $id
      */
-    public function findPk($id)
+    public function findPk(string $id): TalentHashtagAggregate
     {
-        $query = MstTalentHashtag::where('id', $id);
-        return $query->find();
+        $entity = MstTalentHashtag::where('id', $id)->first();
+        return new TalentHashtagAggregate($entity);
     }
 
-    public function getByTalentId($talentId)
+    public function getByTalentId(string $talentId): TalentHashtagAggregateList
     {
-        $query = MstTalentHashtag::where('talent_id', $talentId);
-        return $query->get();
+        $entities = MstTalentHashtag::where('talent_id', $talentId)->get();
+        return $this->createAggregateList($entities);
     }
 
     /**
      * 複数件取得（全件）
      */
-    public function all()
+    public function all(): TalentHashtagAggregateList
     {
-        return MstTalentHashtag::get();
+        $entities = MstTalentHashtag::get();
+        return $this->createAggregateList($entities);
     }
 
     /**
@@ -57,7 +61,7 @@ class MstTalentHashtagRepository
      */
     public function updateByPk($object, $id)
     {
-        $model = $this->findPk($id);
+        $model = $this->findPk($id)->getEntity();
         $model->update($this->generateEntityByAllColume($object));
         return $model;
     }
@@ -68,7 +72,7 @@ class MstTalentHashtagRepository
      */
     public function deleteByPk($id)
     {
-        $model = $this->findPk($id);
+        $model = $this->findPk($id)->getEntity();
         $model->delete();
         return $model;
     }
@@ -88,6 +92,15 @@ class MstTalentHashtagRepository
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];
+    }
+    
+    private function createAggregateList(Collection $entities): TalentHashtagAggregateList
+    {
+        $aggregateList = new TalentHashtagAggregateList(new Collection());
+        foreach ($entities as $entity) {
+            $aggregateList->add(new TalentHashtagAggregate($entity));
+        }
+        return $aggregateList;
     }
 }
 ?>

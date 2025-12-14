@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Contexts\Domain\Aggregates\Collection\EventHashtagAggregateList;
+use App\Contexts\Domain\Aggregates\EventHashtagAggregate;
 use App\Models\TblEventHashtag;
+use Illuminate\Support\Collection;
 
 class TblEventHashtagRepository
 {
@@ -24,10 +27,10 @@ class TblEventHashtagRepository
         return TblEventHashtag::get();
     }
 
-    public function getByEventIds($eventIds)
+    public function getByEventIds(array $eventIds): EventHashtagAggregateList
     {
-        $query = TblEventHashtag::whereIn('event_id', $eventIds);
-        return $query->get();
+        $entities = TblEventHashtag::whereIn('event_id', $eventIds)->get();
+        return $this->createAggregateList($entities);
     }
 
     /**
@@ -86,6 +89,15 @@ class TblEventHashtagRepository
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];
+    }
+
+    private function createAggregateList(Collection $entities): EventHashtagAggregateList
+    {
+        $aggregates = new Collection();
+        foreach ($entities as $entity) {
+            $aggregates->push(new EventHashtagAggregate($entity));
+        }
+        return new EventHashtagAggregateList($aggregates);
     }
 }
 ?>

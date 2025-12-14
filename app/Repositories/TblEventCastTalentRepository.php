@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Contexts\Domain\Aggregates\Collection\EventCastTalentAggregateList;
+use App\Contexts\Domain\Aggregates\EventCastTalentAggregate;
 use App\Models\TblEventCastTalent;
+use Illuminate\Support\Collection;
 
 class TblEventCastTalentRepository
 {
@@ -16,18 +19,19 @@ class TblEventCastTalentRepository
         return $query->find();
     }
 
-    public function getByTalentId($talentId)
+    public function getByTalentId(string $talentId): EventCastTalentAggregateList
     {
-        $query = TblEventCastTalent::where('talent_id', $talentId);
-        return $query->get();
+        $entities = TblEventCastTalent::where('talent_id', $talentId)->get();
+        return $this->createAggregateList($entities);
     }
 
     /**
      * 複数件取得（全件）
      */
-    public function all()
+    public function all(): EventCastTalentAggregateList
     {
-        return TblEventCastTalent::get();
+        $entities = TblEventCastTalent::get();
+        return $this->createAggregateList($entities);
     }
 
     /**
@@ -86,6 +90,15 @@ class TblEventCastTalentRepository
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];
+    }
+    
+    private function createAggregateList(Collection $entities): EventCastTalentAggregateList
+    {
+        $aggregateList = new EventCastTalentAggregateList(new Collection());
+        foreach ($entities as $entity) {
+            $aggregateList->add(new EventCastTalentAggregate($entity));
+        }
+        return $aggregateList;
     }
 }
 ?>

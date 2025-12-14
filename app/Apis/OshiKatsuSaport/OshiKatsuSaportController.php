@@ -2,33 +2,27 @@
 
 namespace App\Apis\OshiKatsuSaport;
 
+use App\Contexts\Application\Services\Talent\EventHashtagApplicationService;
+use App\Contexts\Application\Services\Talent\TalentHashtagApplicationService;
+use App\Contexts\Domain\Aggregates\EventAggregate;
+use App\Contexts\Domain\Aggregates\EventTypeAggregate;
+use App\Contexts\Domain\Aggregates\TalentAggregate;
+use App\Contexts\Domain\Aggregates\TalentHashtagAggregate;
 use App\Http\Controllers\Controller;
+use App\Models\MstEventType;
 use Illuminate\Http\JsonResponse;
-use App\Repositories\MstTalentRepository;
-use App\Repositories\MstTalentHashtagRepository;
-use App\Repositories\MstEventTypeRepository;
-use App\Repositories\TblEventCastTalentRepository;
-use App\Repositories\TblEventRepository;
-use App\Repositories\TblEventHashtagRepository;
-use Carbon\Carbon;
-use Illuminate\Support\Collection;
 
 class OshiKatsuSaportController extends Controller
 {
-    private $mstTalentRepository;
-    private $mstTalentHashtagRepository;
-    private $mstEventTypeRepository;
-    private $tblEventCastTalentRepository;
-    private $tblEventRepository;
-    private $tblEventHashtagRepository;
+    private $talentHashtagApplicationService;
+    private $eventHashtagApplicationService;
 
-    public function __construct() {
-        $this->mstTalentRepository = new MstTalentRepository();
-        $this->mstTalentHashtagRepository = new MstTalentHashtagRepository();
-        $this->mstEventTypeRepository = new MstEventTypeRepository();
-        $this->tblEventCastTalentRepository = new TblEventCastTalentRepository();
-        $this->tblEventRepository = new TblEventRepository();
-        $this->tblEventHashtagRepository = new TblEventHashtagRepository();
+    public function __construct(
+        TalentHashtagApplicationService $talentHashtagApplicationService,
+        EventHashtagApplicationService $eventHashtagApplicationService,
+    ) {
+        $this->talentHashtagApplicationService = $talentHashtagApplicationService;
+        $this->eventHashtagApplicationService = $eventHashtagApplicationService;
     }
 
     /**
@@ -39,15 +33,21 @@ class OshiKatsuSaportController extends Controller
      */
     public function talents(): JsonResponse
     {
-        $mstTalents = $this->mstTalentRepository->all();
+        // select
+        $talentAggregateList = $this->talentHashtagApplicationService->selectTalent();
+        $talentHashtagAggregateList = $this->talentHashtagApplicationService->selectTalentHashtag();
+        // find
+        $foundTalentAggregateList = $this->talentHashtagApplicationService->findTalentByTalentHashtag($talentAggregateList, $talentHashtagAggregateList);
+        // response
+        $talentAggregates = $foundTalentAggregateList->getAggregates();
         $responseData = [
             'status' => true,
             'data' => [
-                'talents' => $mstTalents->map(function ($mstTalent) {
+                'talents' => $talentAggregates->map(function (TalentAggregate $talentAggregate) {
                     return [
-                        'id' => $mstTalent->id,
-                        'talentName' => $mstTalent->talent_name,
-                        'talentNameEn' => $mstTalent->talent_name_en,
+                        'id' => $talentAggregate->getEntity()->id,
+                        'talentName' => $talentAggregate->getEntity()->talent_name,
+                        'talentNameEn' => $talentAggregate->getEntity()->talent_name_en,
                     ];
                 }),
             ],
@@ -64,60 +64,50 @@ class OshiKatsuSaportController extends Controller
      */
     public function talentHashtags(string $id): JsonResponse
     {
-        $mstTalent = $this->mstTalentRepository->findPk($id);
-        $mstTalentHashtags = $this->mstTalentHashtagRepository->getByTalentId($id);
-        $mstEventTypes = $this->mstEventTypeRepository->all();
-        $tblEventCastTalents = $this->tblEventCastTalentRepository->getByTalentId($id);
-        $tblEvents = $this->tblEventRepository->getByPkIds($tblEventCastTalents->pluck('event_id')->toArray());
-        $tblEventHashtags = $this->tblEventHashtagRepository->getByEventIds($tblEvents->pluck('id')->toArray());
-        $filteredEvents = $this->filterEventsByEventHashtags($tblEvents, $tblEventHashtags);
-        $filteredEvents = $this->filterEventsByNotEndDateOver($filteredEvents, 8);
-
+        // select
+        $talentAggregate = $this->talentHashtagApplicationService->findTalent($id);
+        $talentHashtagAggregateList = $this->talentHashtagApplicationService->selectTalentHashtagByTalentId($id);
+        $eventTypeAggregateList = $this->eventHashtagApplicationService->selectEventType();
+        $eventCastTalentAggregateList = $this->eventHashtagApplicationService->selectEventCastTalentByTalentId($id);
+        $eventAggregateList = $this->eventHashtagApplicationService->selectEventByIds($eventCastTalentAggregateList->getEventIds());
+        $eventHashtagAggregateList = $this->eventHashtagApplicationService->selectEventHashtagByEventIds($eventAggregateList->getIds());
+        // find
+        $foundEventAggregateList = $this->eventHashtagApplicationService->findEventAggregateListByEventHashtags($eventAggregateList, $eventHashtagAggregateList);
+        $foundEventAggregateList = $this->eventHashtagApplicationService->findEventAggregateListByNotEndDateOver($foundEventAggregateList, 8);
+        // response
+        $talentHashtagAggregates = $talentHashtagAggregateList->getAggregates();
+        $eventAggregates = $foundEventAggregateList->getAggregates();
         $responseData = [
             'status' => true,
             'data' => [
                 'talent' => [
-                    'id' => $mstTalent->id,
-                    'name' => $mstTalent->talent_name,
+                    'id' => $talentAggregate->getEntity()->id,
+                    'name' => $talentAggregate->getEntity()->talent_name,
                 ],
-                'hashtags' => $mstTalentHashtags->map(function ($mstTalentHashtag) {
+                'hashtags' => $talentHashtagAggregates->map(function (TalentHashtagAggregate $talentHashtagAggregate) {
                     return [
-                        'id' => $mstTalentHashtag->id,
-                        'tag' => $mstTalentHashtag->hashtag,
-                        'description' => $mstTalentHashtag->description,
+                        'id' => $talentHashtagAggregate->getEntity()->id,
+                        'tag' => $talentHashtagAggregate->getEntity()->hashtag,
+                        'description' => $talentHashtagAggregate->getEntity()->description,
                     ];
                 })->values(),
-                'eventHashtags' => $filteredEvents->map(function ($tblEvent) use ($mstEventTypes, $tblEventHashtags) {
+                'eventHashtags' => $eventAggregates->map(function (EventAggregate $eventAggregate) use ($eventTypeAggregateList, $eventHashtagAggregateList) {
+                    $eventTypeAggregate = $eventTypeAggregateList->firstById($eventAggregate->getEntity()->event_type_id) ?? new EventTypeAggregate(new MstEventType());
+                    $eventHashtagAggregateList = $eventHashtagAggregateList->fillterByEventId($eventAggregate->getEntity()->id);
                     return [
-                        'id' => $tblEvent->id,
-                        'startDate' => $tblEvent->event_start_date,
-                        'endDate' => $tblEvent->event_end_date,
-                        'startTime' => $tblEvent->start_time,
-                        'endTime' => $tblEvent->end_time,
-                        'type' => $mstEventTypes->where('id', $tblEvent->event_type_id)->first()->event_type_name,
-                        'eventName' => $tblEvent->event_name,
-                        'url' => $tblEvent->event_url,
-                        'tag' => $tblEventHashtags->where('event_id', $tblEvent->id)->pluck('hashtag')->implode(','),
+                        'id' => $eventAggregate->getEntity()->id,
+                        'startDate' => $eventAggregate->getEntity()->event_start_date,
+                        'endDate' => $eventAggregate->getEntity()->event_end_date,
+                        'startTime' => $eventAggregate->getEntity()->start_time,
+                        'endTime' => $eventAggregate->getEntity()->end_time,
+                        'type' => $eventTypeAggregate->getEntity()->event_type_name,
+                        'eventName' => $eventAggregate->getEntity()->event_name,
+                        'url' => $eventAggregate->getEntity()->event_url,
+                        'tag' => implode(',', $eventHashtagAggregateList->getHashtags()),
                     ];
                 })->values(),
             ],
         ];
         return response()->json($responseData);
-    }
-
-    private function filterEventsByEventHashtags($tblEvents, $tblEventHashtags): Collection
-    {
-        return $tblEvents->filter(function ($tblEvent) use ($tblEventHashtags) {
-            return $tblEventHashtags->where('event_id', $tblEvent->id)->isNotEmpty();
-        });
-    }
-
-    private function filterEventsByNotEndDateOver($tblEvents, $reserveDays): Collection
-    {
-        return $tblEvents->filter(function ($tblEvent) use ($reserveDays) {
-            if(empty($tblEvent->event_end_date)) return true;
-            $endDate = Carbon::parse($tblEvent->event_end_date)->addDays($reserveDays);
-            return $endDate->isAfter(Carbon::now());
-        });
     }
 }
