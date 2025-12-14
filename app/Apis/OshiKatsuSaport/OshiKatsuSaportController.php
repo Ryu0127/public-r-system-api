@@ -73,7 +73,7 @@ class OshiKatsuSaportController extends Controller
         $eventHashtagAggregateList = $this->eventHashtagApplicationService->selectEventHashtagByEventIds($eventAggregateList->getIds());
         // find
         $foundEventAggregateList = $this->eventHashtagApplicationService->findEventAggregateListByEventHashtags($eventAggregateList, $eventHashtagAggregateList);
-        $foundEventAggregateList = $this->eventHashtagApplicationService->findEventAggregateListByNotEndDateOver($foundEventAggregateList, 8);
+        $foundEventAggregateList = $this->eventHashtagApplicationService->findEventAggregateListByNotEndDateOver($foundEventAggregateList, 7);
         // response
         $talentHashtagAggregates = $talentHashtagAggregateList->getAggregates();
         $eventAggregates = $foundEventAggregateList->getAggregates();
