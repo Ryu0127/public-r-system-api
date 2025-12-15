@@ -44,7 +44,9 @@ class EventsController extends Controller
         $responseData = [
             'success' => true,
             'data' => $eventAggregates->map(function ($eventAggregate) use ($eventCastTalentAggregateList, $talentAggregateList, $eventTypeAggregateList) {
-                $eventTypeAggregate = $eventTypeAggregateList->firstById($eventAggregate->getEntity()->event_type_id) ?? new EventTypeAggregate(new MstEventType());
+                $eventTypeId = $eventAggregate->getEntity()->event_type_id;
+                $eventTypeAggregate = $eventTypeId ? $eventTypeAggregateList->firstById($eventTypeId) : null;
+                $eventTypeAggregate = $eventTypeAggregate ?? new EventTypeAggregate(new MstEventType());
                 $eventCastTalentAggregateList = $eventCastTalentAggregateList->filterByEventId($eventAggregate->getEntity()->id);
                 $filteredTalentAggregateList = $talentAggregateList->filterById($eventCastTalentAggregateList->getTalentIds());
 
@@ -93,7 +95,9 @@ class EventsController extends Controller
         $talentAggregateList = $this->eventApplicationService->selectTalent();
         $eventCastTalentAggregateList = $this->eventApplicationService->selectEventCastTalent();
         // filter
-        $eventTypeAggregate = $eventTypeAggregateList->firstById($eventAggregate->getEntity()->event_type_id) ?? new EventTypeAggregate(new MstEventType());
+        $eventTypeId = $eventAggregate->getEntity()->event_type_id;
+        $eventTypeAggregate = $eventTypeId ? $eventTypeAggregateList->firstById($eventTypeId) : null;
+        $eventTypeAggregate = $eventTypeAggregate ?? new EventTypeAggregate(new MstEventType());
         $eventCastTalentAggregateList = $eventCastTalentAggregateList->filterByEventId($eventAggregate->getEntity()->id);
         $filteredTalentAggregateList = $talentAggregateList->filterById($eventCastTalentAggregateList->getTalentIds());
         $notes = $eventAggregate->getEntity()->note ? [$eventAggregate->getEntity()->note] : [];
