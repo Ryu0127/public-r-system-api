@@ -40,7 +40,7 @@ class EventsController extends Controller
         $talentAggregateList = $this->eventApplicationService->selectTalent();
         $eventCastTalentAggregateList = $this->eventApplicationService->selectEventCastTalent();
         // filter
-        $filteredEventAggregateList = $eventAggregateList->filterNotEntryOrCloseEvent();
+        $filteredEventAggregateList = $eventAggregateList->filterNotEntryOrNotCloseEvent();
         // response
         $responseData = [
             'success' => true,

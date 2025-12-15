@@ -26,12 +26,12 @@ class EventAggregateList
         })->toArray();
     }
 
-    public function filterNotEntryOrCloseEvent(): EventAggregateList
+    public function filterNotEntryOrNotCloseEvent(): EventAggregateList
     {
         return new EventAggregateList($this->aggregates->filter(function ($aggregate) {
             $isEntryEvent = in_array($aggregate->getEntity()->event_type_id, [5, 6]);
             $isCloseEvent = $aggregate->getEntity()->event_end_date < now();
-            return !$isEntryEvent || !($isEntryEvent && $isCloseEvent);
+            return !$isEntryEvent || ($isEntryEvent && !$isCloseEvent);
         }));
     }
 
