@@ -174,22 +174,22 @@ class EventsController extends Controller
             foreach ($request->events as $index => $eventData) {
                 try {
                     $requestData = [
-                        'event_name' => $eventData->get('event_name', null),
-                        'event_start_date' => $eventData->get('event_start_date', null),
-                        'event_end_date' => $eventData->get('event_end_date', null),
-                        'start_time' => $eventData->get('start_time', null),
-                        'end_time' => $eventData->get('end_time', null),
-                        'event_type_name' => $eventData->get('event_type_name', null),
-                        'description' => $eventData->get('description', null),
-                        'note' => $eventData->get('note', null),
-                        'location' => $eventData->get('location', null),
-                        'address' => $eventData->get('address', null),
-                        'latitude' => $eventData->get('latitude', null),
-                        'longitude' => $eventData->get('longitude', null),
-                        'station' => $eventData->get('station', null),
-                        'event_url' => $eventData->get('event_url', null),
-                        'thumbnail_img_url' => $eventData->get('thumbnail_img_url', null),
-                        'talent_names' => $eventData->get('talent_names', []),
+                        'event_name' => $eventData['event_name'] ?? null,
+                        'event_start_date' => $eventData['event_start_date'] ?? null,
+                        'event_end_date' => $eventData['event_end_date'] ?? null,
+                        'start_time' => $eventData['start_time'] ?? null,
+                        'end_time' => $eventData['end_time'] ?? null,
+                        'event_type_name' => $eventData['event_type_name'] ?? null,
+                        'description' => $eventData['description'] ?? null,
+                        'note' => $eventData['note'] ?? null,
+                        'location' => $eventData['location'] ?? null,
+                        'address' => $eventData['address'] ?? null,
+                        'latitude' => $eventData['latitude'] ?? null,
+                        'longitude' => $eventData['longitude'] ?? null,
+                        'station' => $eventData['station'] ?? null,
+                        'event_url' => $eventData['event_url'] ?? null,
+                        'thumbnail_img_url' => $eventData['thumbnail_img_url'] ?? null,
+                        'talent_names' => $eventData['talent_names'] ?? [],
                     ];
                     // イベントタイプ名からIDを取得
                     $eventTypeAggregates = $eventTypeAggregateList->getAggregates();

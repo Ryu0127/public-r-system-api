@@ -34,7 +34,8 @@ class EventApplicationService
 
     public function firstEventById(string $id): EventAggregate
     {
-        return $this->tblEventRepository->findPk($id);
+        $entity = $this->tblEventRepository->findPk($id);
+        return new EventAggregate($entity);
     }
 
     public function selectEvent(): EventAggregateList
@@ -59,13 +60,13 @@ class EventApplicationService
 
     public function insertEvent(EventAggregate $eventAggregate): EventAggregate
     {
-        $this->tblEventRepository->insert($eventAggregate->getEntity());
-        return $eventAggregate;
+        $entity = $this->tblEventRepository->insert($eventAggregate->getEntity());
+        return new EventAggregate($entity);
     }
 
     public function insertEventCastTalent(EventCastTalentAggregate $eventCastTalentAggregate): EventCastTalentAggregate
     {
-        $this->tblEventCastTalentRepository->insert($eventCastTalentAggregate->getEntity());
-        return $eventCastTalentAggregate;
+        $entity = $this->tblEventCastTalentRepository->insert($eventCastTalentAggregate->getEntity());
+        return new EventCastTalentAggregate($entity);
     }
 }
