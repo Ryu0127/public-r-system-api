@@ -74,7 +74,7 @@ class EventsController extends Controller
                     'createdAt' => $eventAggregate->getEntity()->created_datetime,
                     'updatedAt' => $eventAggregate->getEntity()->updated_datetime,
                 ];
-            }),
+            })->values(),
             'message' => 'イベント一覧を取得しました',
         ];
 
