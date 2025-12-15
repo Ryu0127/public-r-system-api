@@ -4,8 +4,13 @@ namespace App\Apis\Events;
 
 use App\Contexts\Domain\Aggregates\EventTypeAggregate;
 use App\Contexts\Application\Services\Talent\EventApplicationService;
+use App\Contexts\Domain\Aggregates\EventAggregate;
+use App\Contexts\Domain\Aggregates\EventCastTalentAggregate;
 use App\Http\Controllers\Controller;
+use App\Models\MstEvent;
 use App\Models\MstEventType;
+use App\Models\TblEvent;
+use App\Models\TblEventCastTalent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -175,12 +180,27 @@ class EventsController extends Controller
                     });
 
                     // イベントデータをオブジェクトに変換
-                    $eventObject = (object) array_merge($eventData, [
-                        'event_type_id' => $eventTypeAggregate ? $eventTypeAggregate->getEntity()->id : null
-                    ]);
+                    $eventEntity = new TblEvent();
+                    $eventEntity->event_name = $eventData['event_name'];
+                    $eventEntity->event_start_date = $eventData['event_start_date'];
+                    $eventEntity->event_end_date = $eventData['event_end_date'];
+                    $eventEntity->start_time = $eventData['start_time'];
+                    $eventEntity->end_time = $eventData['end_time'];
+                    $eventEntity->event_type_id = $eventTypeAggregate ? $eventTypeAggregate->getEntity()->id : null;
+                    $eventEntity->description = $eventData['description'];
+                    $eventEntity->note = $eventData['note'];
+                    $eventEntity->location = $eventData['location'];
+                    $eventEntity->address = $eventData['address'];
+                    $eventEntity->latitude = $eventData['latitude'];
+                    $eventEntity->longitude = $eventData['longitude'];
+                    $eventEntity->station = $eventData['station'];
+                    $eventEntity->event_url = $eventData['event_url'];
+                    $eventEntity->created_datetime = now();
+                    $eventEntity->updated_datetime = now();
+                    $eventAggregate = new EventAggregate($eventEntity);
 
                     // イベントを登録
-                    $eventAggregate = $this->eventApplicationService->insertEvent($eventObject);
+                    $eventAggregate = $this->eventApplicationService->insertEvent($eventAggregate);
 
                     // タレント名が存在する場合はIDに変換して関連付けを登録
                     if (isset($eventData['talent_names']) && is_array($eventData['talent_names'])) {
@@ -191,13 +211,13 @@ class EventsController extends Controller
                             });
                             if (!$talentAggregate) continue;
 
-                            $castTalentObject = (object) [
-                                'event_id' => $eventAggregate->getEntity()->id,
-                                'talent_id' => $talentAggregate->getEntity()->id,
-                                'created_datetime' => now(),
-                                'updated_datetime' => now(),
-                            ];
-                            $this->eventApplicationService->insertEventCastTalent($castTalentObject);
+                            $castTalentEntity = new TblEventCastTalent();
+                            $castTalentEntity->event_id = $eventAggregate->getEntity()->id;
+                            $castTalentEntity->talent_id = $talentAggregate->getEntity()->id;
+                            $castTalentEntity->created_datetime = now();
+                            $castTalentEntity->updated_datetime = now();
+                            $castTalentAggregate = new EventCastTalentAggregate($castTalentEntity);
+                            $this->eventApplicationService->insertEventCastTalent($castTalentAggregate);
                         }
                     }
 
