@@ -173,28 +173,47 @@ class EventsController extends Controller
 
             foreach ($request->events as $index => $eventData) {
                 try {
+                    $requestData = [
+                        'event_name' => $eventData->get('event_name', null),
+                        'event_start_date' => $eventData->get('event_start_date', null),
+                        'event_end_date' => $eventData->get('event_end_date', null),
+                        'start_time' => $eventData->get('start_time', null),
+                        'end_time' => $eventData->get('end_time', null),
+                        'event_type_name' => $eventData->get('event_type_name', null),
+                        'description' => $eventData->get('description', null),
+                        'note' => $eventData->get('note', null),
+                        'location' => $eventData->get('location', null),
+                        'address' => $eventData->get('address', null),
+                        'latitude' => $eventData->get('latitude', null),
+                        'longitude' => $eventData->get('longitude', null),
+                        'station' => $eventData->get('station', null),
+                        'event_url' => $eventData->get('event_url', null),
+                        'thumbnail_img_url' => $eventData->get('thumbnail_img_url', null),
+                        'talent_names' => $eventData->get('talent_names', []),
+                    ];
                     // イベントタイプ名からIDを取得
                     $eventTypeAggregates = $eventTypeAggregateList->getAggregates();
-                    $eventTypeAggregate = $eventTypeAggregates->first(function ($aggregate) use ($eventData) {
-                        return $aggregate->getEntity()->event_type_name === $eventData['event_type_name'];
+                    $eventTypeAggregate = $eventTypeAggregates->first(function ($aggregate) use ($requestData) {
+                        return $aggregate->getEntity()->event_type_name === $requestData['event_type_name'];
                     });
 
                     // イベントデータをオブジェクトに変換
                     $eventEntity = new TblEvent();
-                    $eventEntity->event_name = $eventData['event_name'];
-                    $eventEntity->event_start_date = $eventData['event_start_date'];
-                    $eventEntity->event_end_date = $eventData['event_end_date'];
-                    $eventEntity->start_time = $eventData['start_time'];
-                    $eventEntity->end_time = $eventData['end_time'];
+                    $eventEntity->event_name = $requestData['event_name'];
+                    $eventEntity->event_start_date = $requestData['event_start_date'];
+                    $eventEntity->event_end_date = $requestData['event_end_date'];
+                    $eventEntity->start_time = $requestData['start_time'];
+                    $eventEntity->end_time = $requestData['end_time'];
                     $eventEntity->event_type_id = $eventTypeAggregate ? $eventTypeAggregate->getEntity()->id : null;
-                    $eventEntity->description = $eventData['description'];
-                    $eventEntity->note = $eventData['note'];
-                    $eventEntity->location = $eventData['location'];
-                    $eventEntity->address = $eventData['address'];
-                    $eventEntity->latitude = $eventData['latitude'];
-                    $eventEntity->longitude = $eventData['longitude'];
-                    $eventEntity->station = $eventData['station'];
-                    $eventEntity->event_url = $eventData['event_url'];
+                    $eventEntity->description = $requestData['description'];
+                    $eventEntity->note = $requestData['note'];
+                    $eventEntity->location = $requestData['location'];
+                    $eventEntity->address = $requestData['address'];
+                    $eventEntity->latitude = $requestData['latitude'];
+                    $eventEntity->longitude = $requestData['longitude'];
+                    $eventEntity->station = $requestData['station'];
+                    $eventEntity->event_url = $requestData['event_url'];
+                    $eventEntity->thumbnail_img_url = $requestData['thumbnail_img_url'];
                     $eventEntity->created_datetime = now();
                     $eventEntity->updated_datetime = now();
                     $eventAggregate = new EventAggregate($eventEntity);
@@ -203,9 +222,9 @@ class EventsController extends Controller
                     $eventAggregate = $this->eventApplicationService->insertEvent($eventAggregate);
 
                     // タレント名が存在する場合はIDに変換して関連付けを登録
-                    if (isset($eventData['talent_names']) && is_array($eventData['talent_names'])) {
+                    if (isset($requestData['talent_names']) && is_array($requestData['talent_names'])) {
                         $talentAggregates = $talentAggregateList->getAggregates();
-                        foreach ($eventData['talent_names'] as $talentName) {
+                        foreach ($requestData['talent_names'] as $talentName) {
                             $talentAggregate = $talentAggregates->first(function ($aggregate) use ($talentName) {
                                 return $aggregate->getEntity()->talent_name === $talentName;
                             });
