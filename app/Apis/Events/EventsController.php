@@ -39,11 +39,12 @@ class EventsController extends Controller
         $eventTypeAggregateList = $this->eventApplicationService->selectEventType();
         $talentAggregateList = $this->eventApplicationService->selectTalent();
         $eventCastTalentAggregateList = $this->eventApplicationService->selectEventCastTalent();
+        // filter
+        $filteredEventAggregateList = $eventAggregateList->filterNotEntryOrCloseEvent();
         // response
-        $eventAggregates = $eventAggregateList->getAggregates();
         $responseData = [
             'success' => true,
-            'data' => $eventAggregates->map(function ($eventAggregate) use ($eventCastTalentAggregateList, $talentAggregateList, $eventTypeAggregateList) {
+            'data' => $filteredEventAggregateList->getAggregates()->map(function ($eventAggregate) use ($eventCastTalentAggregateList, $talentAggregateList, $eventTypeAggregateList) {
                 $eventTypeId = $eventAggregate->getEntity()->event_type_id;
                 $eventTypeAggregate = $eventTypeId ? $eventTypeAggregateList->firstById($eventTypeId) : null;
                 $eventTypeAggregate = $eventTypeAggregate ?? new EventTypeAggregate(new MstEventType());
