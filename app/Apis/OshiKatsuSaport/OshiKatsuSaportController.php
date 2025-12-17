@@ -44,10 +44,14 @@ class OshiKatsuSaportController extends Controller
             'status' => true,
             'data' => [
                 'talents' => $talentAggregates->map(function (TalentAggregate $talentAggregate) {
+                    $entity = $talentAggregate->getEntity();
                     return [
-                        'id' => $talentAggregate->getEntity()->id,
-                        'talentName' => $talentAggregate->getEntity()->talent_name,
-                        'talentNameEn' => $talentAggregate->getEntity()->talent_name_en,
+                        'id' => $entity->id,
+                        'talentName' => $entity->talent_name,
+                        'talentNameEn' => $entity->talent_name_en,
+                        'groupName' => $entity->group_name ?? '',
+                        'groupId' => $entity->group_id ?? 0,
+                        'twitterAccounts' => $entity->twitter_accounts ?? [],
                     ];
                 }),
             ],

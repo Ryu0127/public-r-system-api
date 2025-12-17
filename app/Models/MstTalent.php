@@ -18,4 +18,13 @@ class MstTalent extends Model
     protected $guarded = [];
     const CREATED_AT = null;
     const UPDATED_AT = null;
+
+    /**
+     * キャスト設定
+     *
+     * @var array
+     */
+    protected $casts = [
+        'twitter_accounts' => 'array',
+    ];
 }

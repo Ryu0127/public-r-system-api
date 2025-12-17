@@ -81,6 +81,9 @@ class MstTalentRepository
             'id' => $object->id,
             'talent_name' => $object->talent_name,
             'talent_name_en' => $object->talent_name_en,
+            'group_name' => $object->group_name ?? null,
+            'group_id' => $object->group_id ?? null,
+            'twitter_accounts' => $object->twitter_accounts ?? null,
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];
