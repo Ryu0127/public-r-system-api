@@ -66,10 +66,8 @@ class OshiKatsuSaportController extends Controller
         // select
         $talentAggregateList = $this->talentHashtagApplicationService->selectTalent();
         $talentHashtagAggregateList = $this->talentHashtagApplicationService->selectTalentHashtag();
-        // find
-        $foundTalentAggregateList = $this->talentHashtagApplicationService->findTalentByTalentHashtag($talentAggregateList, $talentHashtagAggregateList);
         // response
-        $talentAggregates = $foundTalentAggregateList->getAggregates();
+        $talentAggregates = $talentHashtagAggregateList->getAggregates();
         $responseData = [
             'status' => true,
             'data' => [
@@ -79,9 +77,9 @@ class OshiKatsuSaportController extends Controller
                         'id' => $entity->id,
                         'talentName' => $entity->talent_name,
                         'talentNameEn' => $entity->talent_name_en,
-                        'groupName' => $entity->group_name ?? '',
-                        'groupId' => $entity->group_id ?? 0,
-                        'twitterAccounts' => $entity->twitter_accounts ?? [],
+                        'groupName' => '',
+                        'groupId' => 0,
+                        'twitterAccounts' => ["tokino_sora"],
                         // 将来的にプリセットデータなどを追加可能
                     ];
                 }),
