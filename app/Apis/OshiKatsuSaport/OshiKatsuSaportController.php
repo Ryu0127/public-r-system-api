@@ -56,6 +56,39 @@ class OshiKatsuSaportController extends Controller
     }
 
     /**
+     * エゴサーチサポート用タレント一覧取得API
+     * GET /oshi-katsu-saport/ego-search/talents
+     *
+     * @return JsonResponse
+     */
+    public function egoSearchTalents(): JsonResponse
+    {
+        // select
+        $talentAggregateList = $this->talentHashtagApplicationService->selectTalent();
+        $talentHashtagAggregateList = $this->talentHashtagApplicationService->selectTalentHashtag();
+        // response
+        $talentAggregates = $talentHashtagAggregateList->getAggregates();
+        $responseData = [
+            'status' => true,
+            'data' => [
+                'talents' => $talentAggregates->map(function (TalentAggregate $talentAggregate) {
+                    $entity = $talentAggregate->getEntity();
+                    return [
+                        'id' => $entity->id,
+                        'talentName' => $entity->talent_name,
+                        'talentNameEn' => $entity->talent_name_en,
+                        'groupName' => '',
+                        'groupId' => 0,
+                        'twitterAccounts' => ["tokino_sora"],
+                        // 将来的にプリセットデータなどを追加可能
+                    ];
+                }),
+            ],
+        ];
+        return response()->json($responseData);
+    }
+
+    /**
      * タレント別ハッシュタグ取得API
      * GET /oshi-katsu-saport/talents/{id}/hashtags
      *
