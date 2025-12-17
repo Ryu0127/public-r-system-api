@@ -65,9 +65,8 @@ class OshiKatsuSaportController extends Controller
     {
         // select
         $talentAggregateList = $this->talentHashtagApplicationService->selectTalent();
-        $talentHashtagAggregateList = $this->talentHashtagApplicationService->selectTalentHashtag();
         // response
-        $talentAggregates = $talentHashtagAggregateList->getAggregates();
+        $talentAggregates = $talentAggregateList->getAggregates();
         $responseData = [
             'status' => true,
             'data' => [
