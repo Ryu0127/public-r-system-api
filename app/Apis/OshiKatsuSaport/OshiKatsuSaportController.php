@@ -49,9 +49,9 @@ class OshiKatsuSaportController extends Controller
                         'id' => $entity->id,
                         'talentName' => $entity->talent_name,
                         'talentNameEn' => $entity->talent_name_en,
-                        'groupName' => $entity->group_name ?? '',
-                        'groupId' => $entity->group_id ?? 0,
-                        'twitterAccounts' => $entity->twitter_accounts ?? [],
+                        'groupName' => '',
+                        'groupId' => 0,
+                        'twitterAccounts' => ["tokino_sora"],
                     ];
                 }),
             ],
