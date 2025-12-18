@@ -3,6 +3,7 @@
 namespace App\Apis\OshiKatsuSaport;
 
 use App\Contexts\Application\Services\Talent\EventHashtagApplicationService;
+use App\Contexts\Application\Services\Talent\TalentAccountApplicationService;
 use App\Contexts\Application\Services\Talent\TalentHashtagApplicationService;
 use App\Contexts\Domain\Aggregates\EventAggregate;
 use App\Contexts\Domain\Aggregates\EventTypeAggregate;
@@ -16,13 +17,16 @@ class OshiKatsuSaportController extends Controller
 {
     private $talentHashtagApplicationService;
     private $eventHashtagApplicationService;
+    private $talentAccountApplicationService;
 
     public function __construct(
         TalentHashtagApplicationService $talentHashtagApplicationService,
         EventHashtagApplicationService $eventHashtagApplicationService,
+        TalentAccountApplicationService $talentAccountApplicationService,
     ) {
         $this->talentHashtagApplicationService = $talentHashtagApplicationService;
         $this->eventHashtagApplicationService = $eventHashtagApplicationService;
+        $this->talentAccountApplicationService = $talentAccountApplicationService;
     }
 
     /**
@@ -65,20 +69,22 @@ class OshiKatsuSaportController extends Controller
     {
         // select
         $talentAggregateList = $this->talentHashtagApplicationService->selectTalent();
+        $talentAccountAggregateList = $this->talentAccountApplicationService->selectTalentAccount();
         // response
         $talentAggregates = $talentAggregateList->getAggregates();
         $responseData = [
             'status' => true,
             'data' => [
-                'talents' => $talentAggregates->map(function (TalentAggregate $talentAggregate) {
+                'talents' => $talentAggregates->map(function (TalentAggregate $talentAggregate) use ($talentAccountAggregateList) {
                     $entity = $talentAggregate->getEntity();
+                    $talentAccountAggregateList = $this->talentAccountApplicationService->findTalentAccountByTalentId($talentAccountAggregateList, $entity->id);
                     return [
                         'id' => $entity->id,
                         'talentName' => $entity->talent_name,
                         'talentNameEn' => $entity->talent_name_en,
                         'groupName' => '',
                         'groupId' => 0,
-                        'twitterAccounts' => ["tokino_sora"],
+                        'twitterAccounts' => $talentAccountAggregateList->getAccountCodes(),
                         // 将来的にプリセットデータなどを追加可能
                     ];
                 }),
