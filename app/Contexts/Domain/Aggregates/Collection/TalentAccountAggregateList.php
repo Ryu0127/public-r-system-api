@@ -38,7 +38,7 @@ class TalentAccountAggregateList
         // filter
         $filteredAggregates = $this->aggregates->filter(function ($aggregate) use ($talentIds) {
             return in_array($aggregate->getEntity()->talent_id, $talentIds);
-        });
+        })->values();
         return new TalentAccountAggregateList($filteredAggregates);
     }
 
