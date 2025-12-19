@@ -3,9 +3,11 @@
 namespace App\Apis\Admin;
 
 use App\Contexts\Application\Services\Talent\TalentAdminApplicationService;
+use App\Contexts\Domain\Aggregates\TalentAccountAggregate;
 use App\Contexts\Domain\Aggregates\TalentAggregate;
 use App\Http\Controllers\Controller;
 use App\Models\MstTalent;
+use App\Models\MstTalentAccount;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -124,7 +126,7 @@ class TalentsController extends Controller
             // Twitterアカウントのみを抽出
             $twitterAccounts = $filteredAccountList
                 ->filter(function ($accountAggregate) {
-                    return $accountAggregate->getEntity()->account_type === 'twitter';
+                    return $accountAggregate->getEntity()->account_type_id == 1;
                 })
                 ->map(function ($accountAggregate) {
                     return $accountAggregate->getEntity()->account_code;
@@ -249,43 +251,56 @@ class TalentsController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         // リクエストデータのバリデーション
-        $validator = Validator::make($request->all(), [
-            'talentName' => 'required|string|max:255',
-            'talentNameEn' => 'nullable|string|max:255',
-            'groupName' => 'nullable|string|max:255',
-            'groupId' => 'nullable|integer',
-            'twitterAccounts' => 'nullable|array',
-            'twitterAccounts.*' => 'string|max:255',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'talentName' => 'required|string|max:255',
+        //     'talentNameEn' => 'nullable|string|max:255',
+        //     'groupName' => 'nullable|string|max:255',
+        //     'groupId' => 'nullable|integer',
+        //     'twitterAccounts' => 'nullable|array',
+        //     'twitterAccounts.*' => 'string|max:255',
+        // ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'バリデーションエラーが発生しました',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
+        // if ($validator->fails()) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'バリデーションエラーが発生しました',
+        //         'errors' => $validator->errors(),
+        //     ], 422);
+        // }
 
         DB::beginTransaction();
         try {
             // 既存のタレントを取得して確認
             $existingTalentAggregate = $this->talentAdminApplicationService->findTalentById((int)$id);
+            $existingTalentAccountAggregateList = $this->talentAdminApplicationService->selectTalentAccount();
 
             // タレントデータをオブジェクトに変換
             $talentEntity = new MstTalent();
             $talentEntity->id = (int)$id;
             $talentEntity->talent_name = $request->talentName;
             $talentEntity->talent_name_en = $request->talentNameEn;
-            $talentEntity->group_name = $request->groupName;
-            $talentEntity->group_id = $request->groupId;
-            $talentEntity->twitter_accounts = $request->twitterAccounts;
-            $talentEntity->created_program_name = $existingTalentAggregate->getEntity()->created_program_name;
             $talentEntity->updated_program_name = 'admin-api';
-
             $talentAggregate = new TalentAggregate($talentEntity);
+
+            foreach ($request->twitterAccounts as $twitterAccount) {
+                $talentAccountEntity = new MstTalentAccount();
+                $talentAccountEntity->talent_id = (int)$id;
+                $talentAccountEntity->account_type_id = 1;
+                $talentAccountEntity->account_code = $twitterAccount;
+                $talentAccountEntity->created_datetime = now();
+                $talentAccountEntity->created_program_name = 'admin-api';
+                $talentAccountEntity->updated_datetime = now();
+                $talentAccountEntity->updated_program_name = 'admin-api';
+                $talentAccountAggregate = new TalentAccountAggregate($talentAccountEntity);
+                $existingTalentAccountAggregate = $existingTalentAccountAggregateList->findByAccountCode($twitterAccount);
+                if(is_null($existingTalentAccountAggregate)) {
+                    $talentAccountAggregate = $this->talentAdminApplicationService->insertTalentAccount($talentAccountAggregate);
+                }
+            }
 
             // タレントを更新
             $talentAggregate = $this->talentAdminApplicationService->updateTalent($talentAggregate, (int)$id);
+            // タレントアカウントの登録更新
 
             DB::commit();
 

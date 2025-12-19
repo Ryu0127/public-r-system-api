@@ -82,6 +82,8 @@ class MstTalentAccountRepository
             'talent_id' => $object->talent_id,
             'account_type_id' => $object->account_type_id,
             'account_code' => $object->account_code,
+            'created_datetime' => $object->created_datetime,
+            'updated_datetime' => $object->updated_datetime,
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];
