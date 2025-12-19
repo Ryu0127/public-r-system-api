@@ -33,6 +33,13 @@ class TalentAccountAggregateList
         })->toArray();
     }
 
+    public function findByAccountCode(string $accountCode): ?TalentAccountAggregate
+    {
+        return $this->aggregates->first(function ($aggregate) use ($accountCode) {
+            return $aggregate->getEntity()->account_code === $accountCode;
+        });
+    }
+
     public function filterByTalentId(array $talentIds): TalentAccountAggregateList
     {
         // filter
