@@ -50,13 +50,24 @@ class TalentsController extends Controller
                     return $hashtagAggregate->getEntity()->talent_id === $entity->id;
                 });
 
+                // Twitterアカウントのみを抽出
+                $twitterAccounts = $filteredAccountList
+                    ->filter(function ($accountAggregate) {
+                        return $accountAggregate->getEntity()->account_type === 'twitter';
+                    })
+                    ->map(function ($accountAggregate) {
+                        return $accountAggregate->getEntity()->account_code;
+                    })
+                    ->values()
+                    ->toArray();
+
                 return [
                     'id' => $entity->id,
                     'talentName' => $entity->talent_name,
                     'talentNameEn' => $entity->talent_name_en,
                     'groupName' => $entity->group_name,
                     'groupId' => $entity->group_id,
-                    'twitterAccounts' => $entity->twitter_accounts ?? [],
+                    'twitterAccounts' => $twitterAccounts,
                     'accounts' => $filteredAccountList->map(function ($accountAggregate) {
                         $account = $accountAggregate->getEntity();
                         return [
@@ -110,6 +121,17 @@ class TalentsController extends Controller
                 return $hashtagAggregate->getEntity()->talent_id === $entity->id;
             });
 
+            // Twitterアカウントのみを抽出
+            $twitterAccounts = $filteredAccountList
+                ->filter(function ($accountAggregate) {
+                    return $accountAggregate->getEntity()->account_type === 'twitter';
+                })
+                ->map(function ($accountAggregate) {
+                    return $accountAggregate->getEntity()->account_code;
+                })
+                ->values()
+                ->toArray();
+
             // response
             $responseData = [
                 'success' => true,
@@ -119,7 +141,7 @@ class TalentsController extends Controller
                     'talentNameEn' => $entity->talent_name_en,
                     'groupName' => $entity->group_name,
                     'groupId' => $entity->group_id,
-                    'twitterAccounts' => $entity->twitter_accounts ?? [],
+                    'twitterAccounts' => $twitterAccounts,
                     'accounts' => $filteredAccountList->map(function ($accountAggregate) {
                         $account = $accountAggregate->getEntity();
                         return [
