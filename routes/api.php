@@ -1,5 +1,6 @@
 <?php
 
+use App\Apis\Admin\TalentsController;
 use App\Apis\Auth\LoginController;
 use App\Apis\Auth\AutoLoginController;
 use App\Apis\Auth\LogoutController;
@@ -102,4 +103,23 @@ Route::get('/oshi-katsu-saport/ego-search/talents', [OshiKatsuSaportController::
     Route::get('/admin/events/{id}', [EventsController::class, 'show']);
     // POST:イベント-イベント登録API（複数件対応）
     Route::post('/admin/events', [EventsController::class, 'store']);
+// });
+
+/*
+ * --------------------------------------------------------------------------
+ * タレント管理
+ * --------------------------------------------------------------------------
+ */
+// トークン認証 + ドメイン制限ルート
+// Route::middleware(['auth.token', 'check.origin'])->group(function () {
+    // GET:タレント-タレント一覧取得API
+    Route::get('/admin/talents', [TalentsController::class, 'index']);
+    // GET:タレント-タレント詳細取得API
+    Route::get('/admin/talents/{id}', [TalentsController::class, 'show']);
+    // POST:タレント-タレント登録API
+    Route::post('/admin/talents', [TalentsController::class, 'store']);
+    // PUT:タレント-タレント更新API
+    Route::put('/admin/talents/{id}', [TalentsController::class, 'update']);
+    // DELETE:タレント-タレント削除API
+    Route::delete('/admin/talents/{id}', [TalentsController::class, 'destroy']);
 // });
