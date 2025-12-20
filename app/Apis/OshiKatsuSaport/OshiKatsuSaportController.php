@@ -3,30 +3,37 @@
 namespace App\Apis\OshiKatsuSaport;
 
 use App\Contexts\Application\Services\Talent\EventHashtagApplicationService;
+use App\Contexts\Application\Services\Talent\SearchWordApplicationService;
 use App\Contexts\Application\Services\Talent\TalentAccountApplicationService;
 use App\Contexts\Application\Services\Talent\TalentHashtagApplicationService;
 use App\Contexts\Domain\Aggregates\EventAggregate;
 use App\Contexts\Domain\Aggregates\EventTypeAggregate;
+use App\Contexts\Domain\Aggregates\SearchWordGroupAggregate;
 use App\Contexts\Domain\Aggregates\TalentAggregate;
 use App\Contexts\Domain\Aggregates\TalentHashtagAggregate;
+use App\Contexts\Domain\Aggregates\TalentSearchWordAggregate;
 use App\Http\Controllers\Controller;
 use App\Models\MstEventType;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class OshiKatsuSaportController extends Controller
 {
     private $talentHashtagApplicationService;
     private $eventHashtagApplicationService;
     private $talentAccountApplicationService;
+    private $searchWordApplicationService;
 
     public function __construct(
         TalentHashtagApplicationService $talentHashtagApplicationService,
         EventHashtagApplicationService $eventHashtagApplicationService,
         TalentAccountApplicationService $talentAccountApplicationService,
+        SearchWordApplicationService $searchWordApplicationService,
     ) {
         $this->talentHashtagApplicationService = $talentHashtagApplicationService;
         $this->eventHashtagApplicationService = $eventHashtagApplicationService;
         $this->talentAccountApplicationService = $talentAccountApplicationService;
+        $this->searchWordApplicationService = $searchWordApplicationService;
     }
 
     /**
@@ -70,48 +77,44 @@ class OshiKatsuSaportController extends Controller
         // select
         $talentAggregateList = $this->talentHashtagApplicationService->selectTalent();
         $talentAccountAggregateList = $this->talentAccountApplicationService->selectTalentAccount();
+        $searchWordGroupAggregateList = $this->searchWordApplicationService->selectSearchWordGroup();
+        $talentSearchWordAggregateList = $this->searchWordApplicationService->selectTalentSearchWord();
         // response
         $talentAggregates = $talentAggregateList->getAggregates();
         $responseData = [
             'status' => true,
             'data' => [
-                'talents' => $talentAggregates->map(function (TalentAggregate $talentAggregate) use ($talentAccountAggregateList) {
+                'talents' => $talentAggregates->map(function (TalentAggregate $talentAggregate) use ($talentAccountAggregateList, $searchWordGroupAggregateList, $talentSearchWordAggregateList) {
                     $entity = $talentAggregate->getEntity();
-                    $talentAccountAggregateList = $this->talentAccountApplicationService->findTalentAccountByTalentId($talentAccountAggregateList, $entity->id);
+                    $filteredTalentAccountAggregateList = $this->talentAccountApplicationService->findTalentAccountByTalentId($talentAccountAggregateList, $entity->id);
+                    $filteredTalentSearchWordAggregateList = $talentSearchWordAggregateList->filterByTalentId($entity->id);
+                    
+                    // 検索ワードグループごとに分類
+                    $searchWordGroups = [];
+                    $searchWordGroupIds = $filteredTalentSearchWordAggregateList->getSearchWordGroupIds();
+                    foreach ($searchWordGroupIds as $searchWordGroupId) {
+                        $searchWordGroupAggregate = $searchWordGroupAggregateList->firstById($searchWordGroupId);
+                        if (!$searchWordGroupAggregate) continue;
+                        
+                        $groupSearchWords = $filteredTalentSearchWordAggregateList->filterBySearchWordGroupId($searchWordGroupId);
+                        $keywords = $groupSearchWords->getAggregates()->map(function (TalentSearchWordAggregate $aggregate) {
+                            return $aggregate->getEntity()->search_word;
+                        })->toArray();
+                        
+                        $searchWordGroups[] = [
+                            'groupName' => $searchWordGroupAggregate->getEntity()->search_word_group_name,
+                            'keywords' => $keywords,
+                        ];
+                    }
+                    
                     return [
                         'id' => $entity->id,
                         'talentName' => $entity->talent_name,
                         'talentNameEn' => $entity->talent_name_en,
                         'groupId' => 0,
                         'groupName' => '',
-                        'twitterAccounts' => $talentAccountAggregateList->getAccountCodes(),
-                        'searchWordGroups' => [
-                            [
-                                'gropuName' => 'タレント',
-                                'keywords' => [
-                                    'ときのそら',
-                                    'そらちゃん',
-                                    'そらち',
-                                    'ぬっさん',
-                                ],
-                            ],
-                            [
-                                'gropuName' => 'イベント',
-                                'keywords' => [
-                                    'ライブ',
-                                    'そらぱ',
-                                ],
-                            ],
-                            [
-                                'gropuName' => 'ハッピーワード',
-                                'keywords' => [
-                                    'ありがとう',
-                                    '好き',
-                                    '癒される',
-                                    'かっこいい',
-                                ],
-                            ],
-                        ],
+                        'twitterAccounts' => $filteredTalentAccountAggregateList->getAccountCodes(),
+                        'searchWordGroups' => $searchWordGroups,
                     ];
                 }),
             ],
