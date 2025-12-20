@@ -113,16 +113,21 @@ class OshiKatsuSaportController extends Controller
                         'keywords' => ['ありがとう', '好き', '癒される', 'かっこいい'],
                     ];
                     
+                    $twitterAccounts = $filteredTalentAccountAggregateList->getAccountCodes();
+                    
                     return [
                         'id' => $entity->id,
                         'talentName' => $entity->talent_name,
                         'talentNameEn' => $entity->talent_name_en,
                         'groupId' => 0,
                         'groupName' => '',
-                        'twitterAccounts' => $filteredTalentAccountAggregateList->getAccountCodes(),
+                        'twitterAccounts' => $twitterAccounts,
                         'searchWordGroups' => $searchWordGroups,
                     ];
-                }),
+                })->filter(function ($talent) {
+                    // talentAccountにデータがある場合のみレスポンスに含める
+                    return !empty($talent['twitterAccounts']);
+                })->values(),
             ],
         ];
         return response()->json($responseData);
