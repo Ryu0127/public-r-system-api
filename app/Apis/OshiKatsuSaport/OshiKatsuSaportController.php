@@ -107,6 +107,12 @@ class OshiKatsuSaportController extends Controller
                         ];
                     }
                     
+                    // 固定の「ハッピーワード」グループを最後に追加
+                    $searchWordGroups[] = [
+                        'groupName' => 'ハッピーワード',
+                        'keywords' => ['ありがとう', '好き', '癒される', 'かっこいい'],
+                    ];
+                    
                     return [
                         'id' => $entity->id,
                         'talentName' => $entity->talent_name,
