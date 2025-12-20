@@ -82,10 +82,36 @@ class OshiKatsuSaportController extends Controller
                         'id' => $entity->id,
                         'talentName' => $entity->talent_name,
                         'talentNameEn' => $entity->talent_name_en,
-                        'groupName' => '',
                         'groupId' => 0,
+                        'groupName' => '',
                         'twitterAccounts' => $talentAccountAggregateList->getAccountCodes(),
-                        // 将来的にプリセットデータなどを追加可能
+                        'searchWorks' => [
+                            [
+                                'gropuName' => 'タレント',
+                                'keywords' => [
+                                    'ときのそら',
+                                    'そらちゃん',
+                                    'そらち',
+                                    'ぬっさん',
+                                ],
+                            ],
+                            [
+                                'gropuName' => 'イベント',
+                                'keywords' => [
+                                    'ライブ',
+                                    'そらぱ',
+                                ],
+                            ],
+                            [
+                                'gropuName' => 'ハッピーワード',
+                                'keywords' => [
+                                    'ありがとう',
+                                    '好き',
+                                    '癒される',
+                                    'かっこいい',
+                                ],
+                            ],
+                        ],
                     ];
                 }),
             ],
