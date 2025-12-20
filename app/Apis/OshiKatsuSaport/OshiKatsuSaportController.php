@@ -85,7 +85,7 @@ class OshiKatsuSaportController extends Controller
                         'groupId' => 0,
                         'groupName' => '',
                         'twitterAccounts' => $talentAccountAggregateList->getAccountCodes(),
-                        'searchWorks' => [
+                        'searchWordGroups' => [
                             [
                                 'gropuName' => 'タレント',
                                 'keywords' => [
