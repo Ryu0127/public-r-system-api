@@ -2,12 +2,16 @@
 
 namespace App\Apis\Admin;
 
+use App\Contexts\Application\Services\Talent\SearchWordApplicationService;
 use App\Contexts\Application\Services\Talent\TalentAdminApplicationService;
+use App\Contexts\Domain\Aggregates\SearchWordGroupAggregate;
 use App\Contexts\Domain\Aggregates\TalentAccountAggregate;
 use App\Contexts\Domain\Aggregates\TalentAggregate;
+use App\Contexts\Domain\Aggregates\TalentSearchWordAggregate;
 use App\Http\Controllers\Controller;
 use App\Models\MstTalent;
 use App\Models\MstTalentAccount;
+use App\Models\MstTalentSearchWord;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,11 +20,14 @@ use Illuminate\Support\Facades\Validator;
 class TalentsController extends Controller
 {
     private $talentAdminApplicationService;
+    private $searchWordApplicationService;
 
     public function __construct(
         TalentAdminApplicationService $talentAdminApplicationService,
+        SearchWordApplicationService $searchWordApplicationService,
     ) {
         $this->talentAdminApplicationService = $talentAdminApplicationService;
+        $this->searchWordApplicationService = $searchWordApplicationService;
     }
 
     /**
@@ -110,6 +117,8 @@ class TalentsController extends Controller
             $talentAggregate = $this->talentAdminApplicationService->findTalentById((int)$id);
             $talentAccountAggregateList = $this->talentAdminApplicationService->selectTalentAccount();
             $talentHashtagAggregateList = $this->talentAdminApplicationService->selectTalentHashtag();
+            $searchWordGroupAggregateList = $this->searchWordApplicationService->selectSearchWordGroup();
+            $talentSearchWordAggregateList = $this->searchWordApplicationService->selectTalentSearchWordByTalentId((string)$id);
 
             $entity = $talentAggregate->getEntity();
 
@@ -133,6 +142,24 @@ class TalentsController extends Controller
                 })
                 ->values()
                 ->toArray();
+
+            // 検索ワードグループごとに分類
+            $searchWordGroups = [];
+            $searchWordGroupIds = $talentSearchWordAggregateList->getSearchWordGroupIds();
+            foreach ($searchWordGroupIds as $searchWordGroupId) {
+                $searchWordGroupAggregate = $searchWordGroupAggregateList->firstById($searchWordGroupId);
+                if (!$searchWordGroupAggregate) continue;
+                
+                $groupSearchWords = $talentSearchWordAggregateList->filterBySearchWordGroupId($searchWordGroupId);
+                $keywords = $groupSearchWords->getAggregates()->map(function (TalentSearchWordAggregate $aggregate) {
+                    return $aggregate->getEntity()->search_word;
+                })->toArray();
+                
+                $searchWordGroups[] = [
+                    'groupName' => $searchWordGroupAggregate->getEntity()->search_word_group_name,
+                    'keywords' => $keywords,
+                ];
+            }
 
             // response
             $responseData = [
@@ -160,6 +187,7 @@ class TalentsController extends Controller
                             'description' => $hashtag->description,
                         ];
                     })->values(),
+                    'searchWordGroups' => $searchWordGroups,
                     'createdProgramName' => $entity->created_program_name,
                     'updatedProgramName' => $entity->updated_program_name,
                 ],
@@ -250,24 +278,6 @@ class TalentsController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        // リクエストデータのバリデーション
-        // $validator = Validator::make($request->all(), [
-        //     'talentName' => 'required|string|max:255',
-        //     'talentNameEn' => 'nullable|string|max:255',
-        //     'groupName' => 'nullable|string|max:255',
-        //     'groupId' => 'nullable|integer',
-        //     'twitterAccounts' => 'nullable|array',
-        //     'twitterAccounts.*' => 'string|max:255',
-        // ]);
-
-        // if ($validator->fails()) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'バリデーションエラーが発生しました',
-        //         'errors' => $validator->errors(),
-        //     ], 422);
-        // }
-
         DB::beginTransaction();
         try {
             // 既存のタレントを取得して確認
@@ -301,6 +311,44 @@ class TalentsController extends Controller
             // タレントを更新
             $talentAggregate = $this->talentAdminApplicationService->updateTalent($talentAggregate, (int)$id);
             // タレントアカウントの登録更新
+
+            // 検索ワードの処理
+            if ($request->has('searchWordGroups') && is_array($request->searchWordGroups)) {
+                // 既存の検索ワードを削除
+                $this->searchWordApplicationService->deleteTalentSearchWordByTalentId((string)$id);
+
+                // 新しい検索ワードを登録
+                foreach ($request->searchWordGroups as $searchWordGroup) {
+                    if (!isset($searchWordGroup['groupName']) || !isset($searchWordGroup['keywords']) || !is_array($searchWordGroup['keywords'])) {
+                        continue;
+                    }
+
+                    $groupName = $searchWordGroup['groupName'];
+                    $keywords = $searchWordGroup['keywords'];
+
+                    // 検索ワードグループを取得または作成
+                    $searchWordGroupId = $this->searchWordApplicationService->findOrCreateSearchWordGroupByName($groupName);
+
+                    // 各キーワードを登録
+                    foreach ($keywords as $keyword) {
+                        if (empty($keyword)) {
+                            continue;
+                        }
+
+                        $talentSearchWordEntity = new MstTalentSearchWord();
+                        $talentSearchWordEntity->talent_id = (int)$id;
+                        $talentSearchWordEntity->search_word_group_id = $searchWordGroupId;
+                        $talentSearchWordEntity->search_word = $keyword;
+                        $talentSearchWordEntity->created_datetime = now();
+                        $talentSearchWordEntity->created_program_name = 'admin-api';
+                        $talentSearchWordEntity->updated_datetime = now();
+                        $talentSearchWordEntity->updated_program_name = 'admin-api';
+
+                        $talentSearchWordAggregate = new TalentSearchWordAggregate($talentSearchWordEntity);
+                        $this->searchWordApplicationService->insertTalentSearchWord($talentSearchWordAggregate);
+                    }
+                }
+            }
 
             DB::commit();
 

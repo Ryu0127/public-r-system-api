@@ -82,6 +82,15 @@ class MstTalentSearchWordRepository
     }
 
     /**
+     * タレントIDで削除
+     * @param string $talentId
+     */
+    public function deleteByTalentId(string $talentId)
+    {
+        return MstTalentSearchWord::where('talent_id', $talentId)->delete();
+    }
+
+    /**
      * Entityの生成（保存可能全カラム）
      * @param  $object
      */
@@ -92,7 +101,9 @@ class MstTalentSearchWordRepository
             'talent_id' => $object->talent_id,
             'search_word_group_id' => $object->search_word_group_id,
             'search_word' => $object->search_word,
+            'created_datetime' => $object->created_datetime,
             'created_program_name' => $object->created_program_name,
+            'updated_datetime' => $object->updated_datetime,
             'updated_program_name' => $object->updated_program_name,
         ];
     }
