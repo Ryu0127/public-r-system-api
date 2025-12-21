@@ -27,6 +27,14 @@ class HomeController extends Controller
                         'link' => '/talent-hashtag-support',
                         'color' => 'amber',
                     ],
+                    [
+                        'id' => 'ego-search-support',
+                        'title' => 'エゴサーチ サポート',
+                        'description' => 'タレントのエゴサーチをサポートします。検索ワードやアカウント情報を確認できます',
+                        'icon' => 'Search',
+                        'link' => '/ego-search-support',
+                        'color' => 'blue',
+                    ],
                 ],
             ],
         ];
@@ -46,6 +54,14 @@ class HomeController extends Controller
             'status' => true,
             'data' => [
                 'changeLogs' => [
+                    [
+                        'id' => '2',
+                        'version' => 'v1.1.0',
+                        'date' => '2025-12-21',
+                        'changes' => [
+                            '「エゴサーチ サポート」機能を追加',
+                        ],
+                    ],
                     [
                         'id' => '1',
                         'version' => 'v1.0.0',
