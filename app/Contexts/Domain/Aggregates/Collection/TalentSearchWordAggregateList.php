@@ -67,5 +67,18 @@ class TalentSearchWordAggregateList
     {
         $this->aggregates->add($aggregate);
     }
+
+    public function sortBySearchWordGroupAggregateList(SearchWordGroupAggregateList $searchWordGroupAggregateList): TalentSearchWordAggregateList
+    {
+        $sorted = $this->aggregates->sortBy(function ($aggregate) use ($searchWordGroupAggregateList) {
+            $searchWordGroupAggregate = $searchWordGroupAggregateList->firstById($aggregate->getEntity()->search_word_group_id);
+            if (!$searchWordGroupAggregate) {
+                // 検索ワードグループが見つからない場合は最後に配置
+                return PHP_INT_MAX;
+            }
+            return $searchWordGroupAggregate->getEntity()->sort_order;
+        })->values();
+        return new TalentSearchWordAggregateList($sorted);
+    }
 }
 

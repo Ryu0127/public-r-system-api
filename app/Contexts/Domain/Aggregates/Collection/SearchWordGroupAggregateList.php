@@ -30,5 +30,13 @@ class SearchWordGroupAggregateList
     {
         $this->aggregates->add($aggregate);
     }
-}
 
+    public function sortBySortOrderDesc(): SearchWordGroupAggregateList
+    {
+        $sorted = $this->aggregates->sortBy(function ($aggregate) {
+            return $aggregate->getEntity()->sort_order;
+        })->values();
+        
+        return new SearchWordGroupAggregateList($sorted);
+    }
+}

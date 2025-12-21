@@ -77,7 +77,7 @@ class OshiKatsuSaportController extends Controller
         // select
         $talentAggregateList = $this->talentHashtagApplicationService->selectTalent();
         $talentAccountAggregateList = $this->talentAccountApplicationService->selectTalentAccount();
-        $searchWordGroupAggregateList = $this->searchWordApplicationService->selectSearchWordGroup();
+        $searchWordGroupAggregateList = $this->searchWordApplicationService->selectSearchWordGroup()->sortBySortOrderDesc();
         $talentSearchWordAggregateList = $this->searchWordApplicationService->selectTalentSearchWord();
         // response
         $talentAggregates = $talentAggregateList->getAggregates();
@@ -88,10 +88,11 @@ class OshiKatsuSaportController extends Controller
                     $entity = $talentAggregate->getEntity();
                     $filteredTalentAccountAggregateList = $this->talentAccountApplicationService->findTalentAccountByTalentId($talentAccountAggregateList, $entity->id);
                     $filteredTalentSearchWordAggregateList = $talentSearchWordAggregateList->filterByTalentId($entity->id);
+                    $sortedTalentSearchWordAggregateList = $filteredTalentSearchWordAggregateList->sortBySearchWordGroupAggregateList($searchWordGroupAggregateList);
                     
                     // 検索ワードグループごとに分類
                     $searchWordGroups = [];
-                    $searchWordGroupIds = $filteredTalentSearchWordAggregateList->getSearchWordGroupIds();
+                    $searchWordGroupIds = $sortedTalentSearchWordAggregateList->getSearchWordGroupIds();
                     foreach ($searchWordGroupIds as $searchWordGroupId) {
                         $searchWordGroupAggregate = $searchWordGroupAggregateList->firstById($searchWordGroupId);
                         if (!$searchWordGroupAggregate) continue;
