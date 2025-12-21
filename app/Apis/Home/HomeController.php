@@ -47,6 +47,14 @@ class HomeController extends Controller
             'data' => [
                 'changeLogs' => [
                     [
+                        'id' => '2',
+                        'version' => 'v1.1.0',
+                        'date' => '2025-12-21',
+                        'changes' => [
+                            '「エゴサーチ サポート」機能を追加',
+                        ],
+                    ],
+                    [
                         'id' => '1',
                         'version' => 'v1.0.0',
                         'date' => '2025-11-15',
