@@ -54,9 +54,9 @@ class TalentMusicController extends Controller
                         'title' => $mstYoutubeMusicVideoAggregate->getEntity()->music_title,
                         'talentIds' => [1],
                         'youtubeVideoId' => $mstYoutubeMusicVideoAggregate->getEntity()->youtube_video_code,
-                        'type' => $mstYoutubeMusicVideoAggregate->getEntity()->youtube_video_code == '1' ? 'original' : 'cover',
+                        'type' => $mstYoutubeMusicVideoAggregate->getEntity()->music_type == '1' ? 'original' : 'cover',
                         'releaseDate' => $mstYoutubeMusicVideoAggregate->getEntity()->public_date,
-                        'description' => $mstYoutubeMusicVideoAggregate->getEntity()->youtube_video_code == '1' ? 'オリジナル曲' : 'カバー曲',
+                        'description' => $mstYoutubeMusicVideoAggregate->getEntity()->music_type == '1' ? 'オリジナル曲' : 'カバー曲',
                     ];
                 })->toArray(),
             ],
