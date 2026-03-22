@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Contexts\Domain\Aggregates\Collection\TalentHashtagAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\TalentHashtagAggregateList;
 use App\Contexts\Domain\Aggregates\TalentHashtagAggregate;
 use App\Models\MstTalentHashtag;
 use Illuminate\Support\Collection;

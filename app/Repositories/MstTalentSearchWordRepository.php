@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Contexts\Domain\Aggregates\Collection\TalentSearchWordAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\TalentSearchWordAggregateList;
 use App\Contexts\Domain\Aggregates\TalentSearchWordAggregate;
 use App\Models\MstTalentSearchWord;
 use Illuminate\Support\Collection;

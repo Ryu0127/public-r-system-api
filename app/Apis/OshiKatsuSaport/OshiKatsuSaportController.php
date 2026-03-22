@@ -8,7 +8,6 @@ use App\Contexts\Application\Services\Talent\TalentAccountApplicationService;
 use App\Contexts\Application\Services\Talent\TalentHashtagApplicationService;
 use App\Contexts\Domain\Aggregates\EventAggregate;
 use App\Contexts\Domain\Aggregates\EventTypeAggregate;
-use App\Contexts\Domain\Aggregates\SearchWordGroupAggregate;
 use App\Contexts\Domain\Aggregates\TalentAggregate;
 use App\Contexts\Domain\Aggregates\TalentHashtagAggregate;
 use App\Contexts\Domain\Aggregates\TalentSearchWordAggregate;

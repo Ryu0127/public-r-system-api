@@ -2,8 +2,8 @@
 
 namespace App\Contexts\Application\Services\Talent;
 
-use App\Contexts\Domain\Aggregates\Collection\TalentAggregateList;
-use App\Contexts\Domain\Aggregates\Collection\TalentHashtagAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\TalentAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\TalentHashtagAggregateList;
 use App\Contexts\Domain\Aggregates\TalentAggregate;
 use App\Repositories\MstTalentRepository;
 use App\Repositories\MstTalentHashtagRepository;

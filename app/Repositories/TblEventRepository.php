@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Contexts\Domain\Aggregates\Collection\EventAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\EventAggregateList;
 use App\Contexts\Domain\Aggregates\EventAggregate;
 use App\Models\TblEvent;
 use Illuminate\Support\Collection;

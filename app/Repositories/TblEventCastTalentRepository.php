@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Contexts\Domain\Aggregates\Collection\EventCastTalentAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\EventCastTalentAggregateList;
 use App\Contexts\Domain\Aggregates\EventCastTalentAggregate;
 use App\Models\TblEventCastTalent;
 use Illuminate\Support\Collection;

@@ -2,30 +2,29 @@
 
 namespace App\Repositories;
 
-use App\Contexts\Domain\Collection\Aggregates\SearchWordGroupAggregateList;
-use App\Contexts\Domain\Aggregates\SearchWordGroupAggregate;
-use App\Models\MstSearchWordGroup;
+use App\Contexts\Domain\Aggregates\RelYoutubeMusicVideoTalentAggregate;
+use App\Contexts\Domain\Collection\Aggregates\RelYoutubeMusicVideoTalentAggregateList;
+use App\Models\RelYoutubeMusicVideoTalent;
 use Illuminate\Support\Collection;
 
-class MstSearchWordGroupRepository
+class RelYoutubeMusicVideoTalentRepository
 {
+    /**
+     * 複数件取得（全件）
+     */
+    public function all(): RelYoutubeMusicVideoTalentAggregateList
+    {
+        return $this->createAggregateList(RelYoutubeMusicVideoTalent::get());
+    }
+
     /**
      * 1件取得（主キー抽出）
      * @param  $id
      */
-    public function findPk($id): SearchWordGroupAggregate
+    public function findPk($id)
     {
-        $entity = MstSearchWordGroup::where('id', $id)->first();
-        return new SearchWordGroupAggregate($entity);
-    }
-
-    /**
-     * 複数件取得（全件）
-     */
-    public function all(): SearchWordGroupAggregateList
-    {
-        $entities = MstSearchWordGroup::get();
-        return $this->createAggregateList($entities);
+        $query = RelYoutubeMusicVideoTalent::where('id', $id);
+        return $query->find();
     }
 
     /**
@@ -36,7 +35,7 @@ class MstSearchWordGroupRepository
      */
     public function paginate($object, int $perPage)
     {
-        return MstSearchWordGroup::paginate($perPage);
+        return RelYoutubeMusicVideoTalent::paginate($perPage);
     }
 
     /**
@@ -45,7 +44,7 @@ class MstSearchWordGroupRepository
      */
     public function insert($object)
     {
-        return MstSearchWordGroup::create($this->generateEntityByAllColume($object));
+        return RelYoutubeMusicVideoTalent::create($this->generateEntityByAllColume($object));
     }
 
     /**
@@ -55,7 +54,7 @@ class MstSearchWordGroupRepository
      */
     public function updateByPk($object, $id)
     {
-        $model = $this->findPk($id)->getEntity();
+        $model = $this->findPk($id);
         $model->update($this->generateEntityByAllColume($object));
         return $model;
     }
@@ -66,7 +65,7 @@ class MstSearchWordGroupRepository
      */
     public function deleteByPk($id)
     {
-        $model = $this->findPk($id)->getEntity();
+        $model = $this->findPk($id);
         $model->delete();
         return $model;
     }
@@ -79,19 +78,18 @@ class MstSearchWordGroupRepository
     {
         return [
             'id' => $object->id,
-            'search_word_group_name' => $object->search_word_group_name,
+            'youtube_music_video_id' => $object->youtube_music_video_id,
+            'talent_id' => $object->talent_id,
             'created_program_name' => $object->created_program_name,
             'updated_program_name' => $object->updated_program_name,
         ];
     }
 
-    private function createAggregateList(Collection $entities): SearchWordGroupAggregateList
+    private function createAggregateList(Collection $entities): RelYoutubeMusicVideoTalentAggregateList
     {
-        $aggregateList = new SearchWordGroupAggregateList(new Collection());
-        foreach ($entities as $entity) {
-            $aggregateList->add(new SearchWordGroupAggregate($entity));
-        }
-        return $aggregateList;
+        return new RelYoutubeMusicVideoTalentAggregateList(new Collection($entities->map(function($entity){
+            return new RelYoutubeMusicVideoTalentAggregate($entity); // RelYoutubeMusicVideoTalentAggregate
+        })));
     }
 }
 ?>

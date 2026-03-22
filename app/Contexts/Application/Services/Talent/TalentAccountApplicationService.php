@@ -2,8 +2,8 @@
 
 namespace App\Contexts\Application\Services\Talent;
 
-use App\Contexts\Domain\Aggregates\Collection\TalentAccountAggregateList;
-use App\Contexts\Domain\Aggregates\Collection\TalentAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\TalentAccountAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\TalentAggregateList;
 use App\Contexts\Domain\Aggregates\TalentAggregate;
 use App\Repositories\MstTalentAccountRepository;
 use App\Repositories\MstTalentRepository;

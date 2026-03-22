@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Contexts\Domain\Aggregates\Collection\TalentAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\TalentAggregateList;
 use App\Contexts\Domain\Aggregates\TalentAggregate;
 use App\Models\MstTalent;
 use Illuminate\Support\Collection;

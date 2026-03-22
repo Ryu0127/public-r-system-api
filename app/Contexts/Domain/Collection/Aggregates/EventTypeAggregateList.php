@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Contexts\Domain\Aggregates\Collection;
+namespace App\Contexts\Domain\Collection\Aggregates;
 
 use App\Contexts\Domain\Aggregates\EventTypeAggregate;
 use Illuminate\Support\Collection;

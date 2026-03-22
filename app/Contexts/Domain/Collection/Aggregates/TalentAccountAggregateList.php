@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Contexts\Domain\Aggregates\Collection;
+namespace App\Contexts\Domain\Collection\Aggregates;
 
 use App\Contexts\Domain\Aggregates\TalentAccountAggregate;
 use Illuminate\Support\Collection;

@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Contexts\Domain\Aggregates\Collection\EventHashtagAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\EventHashtagAggregateList;
 use App\Contexts\Domain\Aggregates\EventHashtagAggregate;
 use App\Models\TblEventHashtag;
 use Illuminate\Support\Collection;

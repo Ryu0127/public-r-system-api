@@ -2,10 +2,10 @@
 
 namespace App\Contexts\Application\Services\Talent;
 
-use App\Contexts\Domain\Aggregates\Collection\EventAggregateList;
-use App\Contexts\Domain\Aggregates\Collection\EventCastTalentAggregateList;
-use App\Contexts\Domain\Aggregates\Collection\EventHashtagAggregateList;
-use App\Contexts\Domain\Aggregates\Collection\EventTypeAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\EventAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\EventCastTalentAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\EventHashtagAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\EventTypeAggregateList;
 use App\Repositories\MstEventTypeRepository;
 use App\Repositories\MstTalentRepository;
 use App\Repositories\TblEventCastTalentRepository;

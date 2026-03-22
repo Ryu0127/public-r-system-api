@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Contexts\Domain\Aggregates\Collection\EventTypeAggregateList;
+use App\Contexts\Domain\Collection\Aggregates\EventTypeAggregateList;
 use App\Contexts\Domain\Aggregates\EventTypeAggregate;
 use App\Models\MstEventType;
 use Illuminate\Support\Collection;
