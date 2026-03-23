@@ -26,13 +26,22 @@ class MstYoutubeMusicVideoAggregateList
         }));
     }
 
+    public function sortByPublicDateDesc(): MstYoutubeMusicVideoAggregateList
+    {
+        return new MstYoutubeMusicVideoAggregateList(
+            $this->aggregates->sortByDesc(function ($aggregate) {
+                return $aggregate->getEntity()->public_date;
+            })->values()
+        );
+    }
+
     public function firstById(string $id): ?MstYoutubeMusicVideoAggregate
     {
         return $this->aggregates->first(function ($aggregate) use ($id) {
             return $aggregate->getEntity()->id == $id;
         });
     }
-
+    
     public function add(MstYoutubeMusicVideoAggregate $aggregate)
     {
         $this->aggregates->add($aggregate);

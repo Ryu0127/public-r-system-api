@@ -1,6 +1,7 @@
 <?php
 
 use App\Apis\Admin\TalentsController;
+use App\Apis\Admin\TalentMusicController as AdminTalentMusicController;
 use App\Apis\Auth\LoginController;
 use App\Apis\Auth\AutoLoginController;
 use App\Apis\Auth\LogoutController;
@@ -9,6 +10,7 @@ use App\Apis\Home\HomeController;
 use App\Apis\Life\LifeScheduleDayTaskController;
 use App\Apis\Life\LifeScheduleMonthTaskController;
 use App\Apis\OshiKatsuSaport\OshiKatsuSaportController;
+use App\Apis\OshiKatsuSaport\TalentMusicTalentsController;
 use App\Apis\OshiKatsuSaport\TalentMusicController;
 use App\Apis\Sync\Life\LifeScheduleController;
 use Illuminate\Http\Request;
@@ -86,6 +88,8 @@ Route::get('/home/limited-time-topic', [HomeController::class, 'limitedTimeTopic
  */
 // GET:推し活サポート-タレント一覧取得API
 Route::get('/oshi-katsu-saport/talents', [OshiKatsuSaportController::class, 'talents']);
+// GET:推し活サポート-タレント別楽曲一覧（タレント選択用）
+Route::get('/oshi-katsu-saport/talent-music/talents', [TalentMusicTalentsController::class, 'index']);
 // GET:推し活サポート-タレント別ハッシュタグ取得API
 Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportController::class, 'talentHashtags']);
 // GET:推し活サポート-エゴサーチ用タレント一覧取得API
@@ -125,4 +129,23 @@ Route::get('/oshi-katsu-saport/talent-music', [TalentMusicController::class, 'in
     Route::put('/admin/talents/{id}', [TalentsController::class, 'update']);
     // DELETE:タレント-タレント削除API
     Route::delete('/admin/talents/{id}', [TalentsController::class, 'destroy']);
+// });
+
+/*
+ * --------------------------------------------------------------------------
+ * 楽曲一覧管理
+ * --------------------------------------------------------------------------
+ */
+// トークン認証 + ドメイン制限ルート
+// Route::middleware(['auth.token', 'check.origin'])->group(function () {
+    // GET:楽曲一覧管理-楽曲一覧取得API
+    Route::get('/admin/talent-music', [AdminTalentMusicController::class, 'index']);
+    // GET:楽曲一覧管理-楽曲詳細取得API
+    Route::get('/admin/talent-music/{id}', [AdminTalentMusicController::class, 'show']);
+    // POST:楽曲一覧管理-楽曲登録API
+    Route::post('/admin/talent-music', [AdminTalentMusicController::class, 'store']);
+    // PUT:楽曲一覧管理-楽曲更新API
+    Route::put('/admin/talent-music/{id}', [AdminTalentMusicController::class, 'update']);
+    // DELETE:楽曲一覧管理-楽曲削除API
+    Route::delete('/admin/talent-music/{id}', [AdminTalentMusicController::class, 'destroy']);
 // });

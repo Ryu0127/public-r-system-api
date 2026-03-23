@@ -35,15 +35,13 @@ class TalentMusicController extends Controller
     public function index(Request $request): JsonResponse
     {
         $talentIds = $this->normalizeTalentIds($request);
-        Log::info($talentIds);
         $relYoutubeMusicVideoTalentAggregateList = $this->relYoutubeMusicVideoTalentRepository
             ->all()
             ->filterByTalentIds($talentIds);
-            Log::info($relYoutubeMusicVideoTalentAggregateList->getYoutubeMusicVideoIds());
         $mstYoutubeMusicVideoAggregateList = $this->mstYoutubeMusicVideoRepository
             ->all()
-            ->filterByIds($relYoutubeMusicVideoTalentAggregateList->getYoutubeMusicVideoIds());
-        Log::info($mstYoutubeMusicVideoAggregateList->getAggregates()->toArray());
+            ->filterByIds($relYoutubeMusicVideoTalentAggregateList->getYoutubeMusicVideoIds())
+            ->sortByPublicDateDesc();
 
         return response()->json([
             'status' => true,
