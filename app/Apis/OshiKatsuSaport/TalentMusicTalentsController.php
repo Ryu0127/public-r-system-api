@@ -9,6 +9,13 @@ use Illuminate\Http\JsonResponse;
 
 class TalentMusicTalentsController extends Controller
 {
+    private function slugify(?string $raw): string
+    {
+        $s = strtolower(trim((string) $raw));
+        $s = preg_replace('/[^a-z0-9]+/', '-', $s) ?? '';
+        return trim($s, '-');
+    }
+
     /**
      * タレント別楽曲一覧（タレント選択UI用）タレント一覧取得API
      * GET /oshi-katsu-saport/talent-music/talents
@@ -41,6 +48,7 @@ class TalentMusicTalentsController extends Controller
                     'id' => $t->id,
                     'talentName' => $t->talent_name,
                     'talentNameEn' => $t->talent_name_en,
+                    'talentSlug' => $this->slugify($t->talent_name_en),
                 ])->values(),
             ],
         ]);

@@ -3,11 +3,11 @@
 namespace App\Apis\OshiKatsuSaport;
 
 use App\Http\Controllers\Controller;
+use App\Models\MstTalent;
 use App\Repositories\MstYoutubeMusicVideoRepository;
 use App\Repositories\RelYoutubeMusicVideoTalentRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 /**
  * タレント別楽曲一覧（フロント talent-music 画面用）
@@ -34,7 +34,27 @@ class TalentMusicController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $talentIds = $this->normalizeTalentIds($request);
+        $talentNameEn = $request->query('talent');
+        if (is_string($talentNameEn) && trim($talentNameEn) !== '') {
+            $talentSlug = trim($talentNameEn);
+            $talent = MstTalent::query()
+                ->get(['id', 'talent_name_en'])
+                ->first(function ($t) use ($talentSlug) {
+                    return $this->slugify($t->talent_name_en) === $talentSlug;
+                });
+            if (!$talent) {
+                return response()->json([
+                    'status' => true,
+                    'data' => [
+                        'musicList' => [],
+                    ],
+                ]);
+            }
+            $talentIds = [(string) $talent->id];
+        } else {
+            $talentIds = $this->normalizeTalentIds($request);
+        }
+
         $relYoutubeMusicVideoTalentAggregateList = $this->relYoutubeMusicVideoTalentRepository
             ->all()
             ->filterByTalentIds($talentIds);
@@ -46,11 +66,11 @@ class TalentMusicController extends Controller
         return response()->json([
             'status' => true,
             'data' => [
-                'musicList' => $mstYoutubeMusicVideoAggregateList->getAggregates()->map(function($mstYoutubeMusicVideoAggregate){
+                'musicList' => $mstYoutubeMusicVideoAggregateList->getAggregates()->map(function($mstYoutubeMusicVideoAggregate) use ($talentIds) {
                     return [
                         'id' => $mstYoutubeMusicVideoAggregate->getEntity()->id,
                         'title' => $mstYoutubeMusicVideoAggregate->getEntity()->music_title,
-                        'talentIds' => [1],
+                        'talentIds' => array_map('intval', $talentIds),
                         'youtubeVideoId' => $mstYoutubeMusicVideoAggregate->getEntity()->youtube_video_code,
                         'type' => $mstYoutubeMusicVideoAggregate->getEntity()->music_type == '1' ? 'original' : 'cover',
                         'releaseDate' => $mstYoutubeMusicVideoAggregate->getEntity()->public_date,
@@ -75,5 +95,12 @@ class TalentMusicController extends Controller
         }
 
         return array_values($raw);
+    }
+
+    private function slugify(?string $raw): string
+    {
+        $s = strtolower(trim((string) $raw));
+        $s = preg_replace('/[^a-z0-9]+/', '-', $s) ?? '';
+        return trim($s, '-');
     }
 }
