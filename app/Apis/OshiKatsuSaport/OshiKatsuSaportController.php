@@ -35,6 +35,13 @@ class OshiKatsuSaportController extends Controller
         $this->searchWordApplicationService = $searchWordApplicationService;
     }
 
+    private function slugify(?string $raw): string
+    {
+        $s = strtolower(trim((string) $raw));
+        $s = preg_replace('/[^a-z0-9]+/', '-', $s) ?? '';
+        return trim($s, '-');
+    }
+
     /**
      * タレント一覧取得API
      * GET /oshi-katsu-saport/talents
@@ -58,6 +65,7 @@ class OshiKatsuSaportController extends Controller
                         'id' => $talentAggregate->getEntity()->id,
                         'talentName' => $talentAggregate->getEntity()->talent_name,
                         'talentNameEn' => $talentAggregate->getEntity()->talent_name_en,
+                        'talentSlug' => $this->slugify($talentAggregate->getEntity()->talent_name_en),
                     ];
                 }),
             ],
@@ -119,6 +127,7 @@ class OshiKatsuSaportController extends Controller
                         'id' => $entity->id,
                         'talentName' => $entity->talent_name,
                         'talentNameEn' => $entity->talent_name_en,
+                        'talentSlug' => $this->slugify($entity->talent_name_en),
                         'groupId' => 0,
                         'groupName' => '',
                         'twitterAccounts' => $twitterAccounts,
