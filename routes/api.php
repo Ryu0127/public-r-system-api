@@ -5,6 +5,7 @@ use App\Apis\Admin\TalentMusicController as AdminTalentMusicController;
 use App\Apis\Auth\LoginController;
 use App\Apis\Auth\AutoLoginController;
 use App\Apis\Auth\LogoutController;
+use App\Apis\Auth\AuthSessionController;
 use App\Apis\Events\EventsController;
 use App\Apis\Home\HomeController;
 use App\Apis\Life\LifeScheduleDayTaskController;
@@ -53,6 +54,8 @@ Route::middleware(['check.origin'])->group(function () {
  */
 // トークン認証 + ドメイン制限ルート
 Route::middleware(['auth.token', 'check.origin'])->group(function () {
+    // GET:認証-Bearerトークン有効性確認
+    Route::get('/auth/session', [AuthSessionController::class, 'show']);
     // GET:LifeSystem-日次スケジュールタスク（データ取得API）
     Route::get('/life/schedule-day/tasks/{date}', [LifeScheduleDayTaskController::class, 'index']);
     // POST:LifeSystem-日次スケジュールタスク（データ更新API）
