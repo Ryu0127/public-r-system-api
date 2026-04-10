@@ -49,6 +49,8 @@ class TalentMusicTalentsController extends Controller
                     'talentName' => $t->talent_name,
                     'talentNameEn' => $t->talent_name_en,
                     'talentSlug' => $this->slugify($t->talent_name_en),
+                    'groupId' => 0,
+                    'groupName' => '0期生',
                 ])->values(),
             ],
         ]);
