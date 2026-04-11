@@ -83,6 +83,8 @@ class TalentMusicTalentsController extends Controller
                 'groups' => $talentGroupAggregateList->getAggregates()->map(fn (TalentGroupAggregate $aggregate) => [
                     'groupId' => $aggregate->getEntity()->id,
                     'groupName' => $aggregate->getEntity()->group_name,
+                    'groupNameEn' => $aggregate->getEntity()->group_name_en,
+                    'groupSlug' => $this->slugify($aggregate->getEntity()->group_name_en),
                     'talents' => $talentAggregateList->filterByTalentGroup($aggregate, $relTalentGroupMemberAggregateList)->getAggregates()->map(fn (TalentAggregate $aggregate) => [
                         'id' => $aggregate->getEntity()->id,
                         'talentName' => $aggregate->getEntity()->talent_name,
