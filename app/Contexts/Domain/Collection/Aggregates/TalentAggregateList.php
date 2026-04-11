@@ -5,6 +5,7 @@ namespace App\Contexts\Domain\Collection\Aggregates;
 use App\Contexts\Domain\Aggregates\TalentAggregate;
 use App\Contexts\Domain\Aggregates\TalentGroupAggregate;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class TalentAggregateList
 {
@@ -48,26 +49,6 @@ class TalentAggregateList
         $talentIds = $relTalentGroupMemberAggregateList->filterByTalentGroup($talentGroupAggregate)->getTalentIds();
         // filter
         return $this->filterById($talentIds);
-    }
-
-    public function sortBySortTalentGroup(SortTalentGroupAggregateList $sortTalentGroupAggregateList): TalentAggregateList
-    {
-        // sort
-        $sortAggregates = new Collection();
-        foreach ($sortTalentGroupAggregateList->getAggregates() as $sortTalentGroupAggregate) {
-            foreach ($this->aggregates as $aggregate) {
-                if ($aggregate->getEntity()->id === $sortTalentGroupAggregate->getEntity()->talent_group_id) {
-                    $sortAggregates->add($aggregate);
-                }
-            }
-        }
-        // other sort
-        foreach ($this->aggregates as $aggregate) {
-            if (!$sortAggregates->contains($aggregate)) {
-                $sortAggregates->add($aggregate);
-            }
-        }
-        return new TalentAggregateList($sortAggregates);
     }
 
     public function add(TalentAggregate $aggregate)

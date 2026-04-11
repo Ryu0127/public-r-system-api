@@ -64,8 +64,11 @@ class TalentMusicTalentsController extends Controller
         $relTalentGroupMemberAggregateList = $this->relTalentGroupMemberRepository->all();
         $sortTalentGroupAggregateList = $this->sortTalentGroupRepository->getBySortType('1');
 
-        $talentAggregateList = $talentAggregateList->filterById($talentIds)
-            ->sortBySortTalentGroup($sortTalentGroupAggregateList);
+        // filter
+        $talentAggregateList = $talentAggregateList->filterById($talentIds);
+
+        // sort
+        $talentGroupAggregateList = $talentGroupAggregateList->sortBySortTalentGroup($sortTalentGroupAggregateList);
 
         return response()->json([
             'status' => true,
