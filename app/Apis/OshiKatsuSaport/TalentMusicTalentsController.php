@@ -9,6 +9,7 @@ use App\Models\RelYoutubeMusicVideoTalent;
 use App\Repositories\MstTalentRepository;
 use App\Repositories\MstTalentGroupRepository;
 use App\Repositories\RelTalentGroupMemberRepository;
+use App\Repositories\SortTalentGroupRepository;
 use Illuminate\Http\JsonResponse;
 
 class TalentMusicTalentsController extends Controller
@@ -17,15 +18,18 @@ class TalentMusicTalentsController extends Controller
     private $talentRepository;
     private $talentGroupRepository;
     private $relTalentGroupMemberRepository;
+    private $sortTalentGroupRepository;
 
     public function __construct(
         MstTalentRepository $talentRepository,
         MstTalentGroupRepository $talentGroupRepository,
         RelTalentGroupMemberRepository $relTalentGroupMemberRepository,
+        SortTalentGroupRepository $sortTalentGroupRepository,
     ) {
         $this->talentRepository = $talentRepository;
         $this->talentGroupRepository = $talentGroupRepository;
         $this->relTalentGroupMemberRepository = $relTalentGroupMemberRepository;
+        $this->sortTalentGroupRepository = $sortTalentGroupRepository;
     }
 
     private function slugify(?string $raw): string
@@ -58,8 +62,10 @@ class TalentMusicTalentsController extends Controller
         $talentAggregateList = $this->talentRepository->all();
         $talentGroupAggregateList = $this->talentGroupRepository->getByTalentIds($talentIds);
         $relTalentGroupMemberAggregateList = $this->relTalentGroupMemberRepository->all();
+        $sortTalentGroupAggregateList = $this->sortTalentGroupRepository->getBySortType('1');
 
-        $talentAggregateList = $talentAggregateList->filterById($talentIds);
+        $talentAggregateList = $talentAggregateList->filterById($talentIds)
+            ->sortBySortTalentGroup($sortTalentGroupAggregateList);
 
         return response()->json([
             'status' => true,
