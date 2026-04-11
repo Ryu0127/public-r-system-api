@@ -69,6 +69,7 @@ class TalentMusicTalentsController extends Controller
                     'talentName' => $aggregate->getEntity()->talent_name,
                     'talentNameEn' => $aggregate->getEntity()->talent_name_en,
                     'talentSlug' => $this->slugify($aggregate->getEntity()->talent_name_en),
+                    'iconImgUrl' => $aggregate->getEntity()->icon_img_url,
                 ])->values(),
                 'groups' => $talentGroupAggregateList->getAggregates()->map(fn (TalentGroupAggregate $aggregate) => [
                     'groupId' => $aggregate->getEntity()->id,
@@ -78,6 +79,7 @@ class TalentMusicTalentsController extends Controller
                         'talentName' => $aggregate->getEntity()->talent_name,
                         'talentNameEn' => $aggregate->getEntity()->talent_name_en,
                         'talentSlug' => $this->slugify($aggregate->getEntity()->talent_name_en),
+                        'iconImgUrl' => $aggregate->getEntity()->icon_img_url,
                     ])->values()
                 ])->values(),
             ],
