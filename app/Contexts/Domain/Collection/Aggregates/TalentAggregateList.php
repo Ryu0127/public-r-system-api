@@ -3,7 +3,9 @@
 namespace App\Contexts\Domain\Collection\Aggregates;
 
 use App\Contexts\Domain\Aggregates\TalentAggregate;
+use App\Contexts\Domain\Aggregates\TalentGroupAggregate;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class TalentAggregateList
 {
@@ -39,6 +41,14 @@ class TalentAggregateList
             return in_array($aggregate->getEntity()->id, $ids);
         });
         return new TalentAggregateList($filteredAggregates);
+    }
+
+    public function filterByTalentGroup(TalentGroupAggregate $talentGroupAggregate, RelTalentGroupMemberAggregateList $relTalentGroupMemberAggregateList): TalentAggregateList
+    {
+        // find
+        $talentIds = $relTalentGroupMemberAggregateList->filterByTalentGroup($talentGroupAggregate)->getTalentIds();
+        // filter
+        return $this->filterById($talentIds);
     }
 
     public function add(TalentAggregate $aggregate)

@@ -2,13 +2,32 @@
 
 namespace App\Apis\OshiKatsuSaport;
 
+use App\Contexts\Domain\Aggregates\TalentAggregate;
+use App\Contexts\Domain\Aggregates\TalentGroupAggregate;
 use App\Http\Controllers\Controller;
-use App\Models\MstTalent;
 use App\Models\RelYoutubeMusicVideoTalent;
+use App\Repositories\MstTalentRepository;
+use App\Repositories\MstTalentGroupRepository;
+use App\Repositories\RelTalentGroupMemberRepository;
 use Illuminate\Http\JsonResponse;
 
 class TalentMusicTalentsController extends Controller
 {
+
+    private $talentRepository;
+    private $talentGroupRepository;
+    private $relTalentGroupMemberRepository;
+
+    public function __construct(
+        MstTalentRepository $talentRepository,
+        MstTalentGroupRepository $talentGroupRepository,
+        RelTalentGroupMemberRepository $relTalentGroupMemberRepository,
+    ) {
+        $this->talentRepository = $talentRepository;
+        $this->talentGroupRepository = $talentGroupRepository;
+        $this->relTalentGroupMemberRepository = $relTalentGroupMemberRepository;
+    }
+
     private function slugify(?string $raw): string
     {
         $s = strtolower(trim((string) $raw));
@@ -36,32 +55,31 @@ class TalentMusicTalentsController extends Controller
             ->map(fn ($v) => (int) $v)
             ->values()
             ->all();
+        $talentAggregateList = $this->talentRepository->all();
+        $talentGroupAggregateList = $this->talentGroupRepository->getByTalentIds($talentIds);
+        $relTalentGroupMemberAggregateList = $this->relTalentGroupMemberRepository->all();
 
-        $talents = MstTalent::query()
-            ->whereIn('id', $talentIds)
-            ->get(['id', 'talent_name', 'talent_name_en']);
+        $talentAggregateList = $talentAggregateList->filterById($talentIds);
 
         return response()->json([
             'status' => true,
             'data' => [
-                'talents' => $talents->map(fn ($t) => [
-                    'id' => $t->id,
-                    'talentName' => $t->talent_name,
-                    'talentNameEn' => $t->talent_name_en,
-                    'talentSlug' => $this->slugify($t->talent_name_en),
+                'talents' => $talentAggregateList->getAggregates()->map(fn (TalentAggregate $aggregate) => [
+                    'id' => $aggregate->getEntity()->id,
+                    'talentName' => $aggregate->getEntity()->talent_name,
+                    'talentNameEn' => $aggregate->getEntity()->talent_name_en,
+                    'talentSlug' => $this->slugify($aggregate->getEntity()->talent_name_en),
                 ])->values(),
-                'groups' => [
-                    [
-                        'groupId' => 0,
-                        'groupName' => '0期生',
-                        'talents' => $talents->map(fn ($t) => [
-                            'id' => $t->id,
-                            'talentName' => $t->talent_name,
-                            'talentNameEn' => $t->talent_name_en,
-                            'talentSlug' => $this->slugify($t->talent_name_en),
-                        ])->values(),
-                    ],
-                ],
+                'groups' => $talentGroupAggregateList->getAggregates()->map(fn (TalentGroupAggregate $aggregate) => [
+                    'groupId' => $aggregate->getEntity()->id,
+                    'groupName' => $aggregate->getEntity()->group_name,
+                    'talents' => $talentAggregateList->filterByTalentGroup($aggregate, $relTalentGroupMemberAggregateList)->getAggregates()->map(fn (TalentAggregate $aggregate) => [
+                        'id' => $aggregate->getEntity()->id,
+                        'talentName' => $aggregate->getEntity()->talent_name,
+                        'talentNameEn' => $aggregate->getEntity()->talent_name_en,
+                        'talentSlug' => $this->slugify($aggregate->getEntity()->talent_name_en),
+                    ])->values()
+                ])->values(),
             ],
         ]);
     }
