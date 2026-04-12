@@ -18,6 +18,15 @@ class TalentGroupAggregateList
     {
         return $this->aggregates;
     }
+    
+    public function filterByTalentGroupNameEnSlug(string $talentGroupNameEn): TalentGroupAggregateList
+    {
+        // filter
+        $filteredAggregates = $this->aggregates->filter(function ($aggregate) use ($talentGroupNameEn) {
+            return $this->slugify($aggregate->getEntity()->group_name_en) === $talentGroupNameEn;
+        });
+        return new TalentGroupAggregateList($filteredAggregates);
+    }
 
     public function sortBySortTalentGroup(SortTalentGroupAggregateList $sortTalentGroupAggregateList): TalentGroupAggregateList
     {
@@ -42,5 +51,12 @@ class TalentGroupAggregateList
     public function add(TalentGroupAggregate $aggregate)
     {
         $this->aggregates->add($aggregate);
+    }
+
+    private function slugify(?string $raw): string
+    {
+        $s = strtolower(trim((string) $raw));
+        $s = preg_replace('/[^a-z0-9]+/', '-', $s) ?? '';
+        return trim($s, '-');
     }
 }

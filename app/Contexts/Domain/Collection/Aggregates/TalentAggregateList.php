@@ -21,6 +21,15 @@ class TalentAggregateList
         return $this->aggregates;
     }
 
+    public function getIds(): array
+    {
+        $ids = [];
+        foreach ($this->aggregates as $aggregate) {
+            $ids[] = $aggregate->getEntity()->id;
+        }
+        return $ids;
+    }
+
     public function getTalentNames(): array
     {
         $talentNames = [];
@@ -43,6 +52,24 @@ class TalentAggregateList
         return new TalentAggregateList($filteredAggregates);
     }
 
+    public function filterByTalentNameEn(string $talentNameEn): TalentAggregateList
+    {
+        // filter
+        $filteredAggregates = $this->aggregates->filter(function ($aggregate) use ($talentNameEn) {
+            return $aggregate->getEntity()->talent_name_en === $talentNameEn;
+        });
+        return new TalentAggregateList($filteredAggregates);
+    }
+
+    public function filterByTalentNameEnSlug(string $talentNameEn): TalentAggregateList
+    {
+        // filter
+        $filteredAggregates = $this->aggregates->filter(function ($aggregate) use ($talentNameEn) {
+            return $this->slugify($aggregate->getEntity()->talent_name_en) === $talentNameEn;
+        });
+        return new TalentAggregateList($filteredAggregates);
+    }
+
     public function filterByTalentGroup(TalentGroupAggregate $talentGroupAggregate, RelTalentGroupMemberAggregateList $relTalentGroupMemberAggregateList): TalentAggregateList
     {
         // find
@@ -54,5 +81,12 @@ class TalentAggregateList
     public function add(TalentAggregate $aggregate)
     {
         $this->aggregates->add($aggregate);
+    }
+
+    private function slugify(?string $raw): string
+    {
+        $s = strtolower(trim((string) $raw));
+        $s = preg_replace('/[^a-z0-9]+/', '-', $s) ?? '';
+        return trim($s, '-');
     }
 }

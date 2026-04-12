@@ -3,9 +3,11 @@
 namespace App\Apis\OshiKatsuSaport;
 
 use App\Http\Controllers\Controller;
-use App\Models\MstTalent;
+use App\Repositories\MstTalentRepository;
 use App\Repositories\MstYoutubeMusicVideoRepository;
 use App\Repositories\RelYoutubeMusicVideoTalentRepository;
+use App\Repositories\MstTalentGroupRepository;
+use App\Repositories\RelTalentGroupMemberRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,52 +17,54 @@ use Illuminate\Http\Request;
  */
 class TalentMusicController extends Controller
 {
+    private $mstTalentGroupRepository;
+    private $mstTalentRepository;
     private $mstYoutubeMusicVideoRepository;
+    private $relTalentGroupMemberRepository;
     private $relYoutubeMusicVideoTalentRepository;
 
     public function __construct(
+        MstTalentGroupRepository $mstTalentGroupRepository,
+        MstTalentRepository $mstTalentRepository,
         MstYoutubeMusicVideoRepository $mstYoutubeMusicVideoRepository,
+        RelTalentGroupMemberRepository $relTalentGroupMemberRepository,
         RelYoutubeMusicVideoTalentRepository $relYoutubeMusicVideoTalentRepository,
     ){
+        $this->mstTalentGroupRepository = $mstTalentGroupRepository;
+        $this->mstTalentRepository = $mstTalentRepository;
         $this->mstYoutubeMusicVideoRepository = $mstYoutubeMusicVideoRepository;
+        $this->relTalentGroupMemberRepository = $relTalentGroupMemberRepository;
         $this->relYoutubeMusicVideoTalentRepository = $relYoutubeMusicVideoTalentRepository;
     }
 
     /**
      * GET /oshi-katsu-saport/talent-music
-     *
-     * クエリ talent_ids: カンマ区切り（1,2,3）または talent_ids[] の繰り返しで複数タレント指定可。
-     * ID が空のときは musicList は空配列。
      */
     public function index(Request $request): JsonResponse
     {
-        $talentNameEn = $request->query('talent');
-        if (is_string($talentNameEn) && trim($talentNameEn) !== '') {
-            $talentSlug = trim($talentNameEn);
-            $talent = MstTalent::query()
-                ->get(['id', 'talent_name_en'])
-                ->first(function ($t) use ($talentSlug) {
-                    return $this->slugify($t->talent_name_en) === $talentSlug;
-                });
-            if (!$talent) {
-                return response()->json([
-                    'status' => true,
-                    'data' => [
-                        'musicList' => [],
-                    ],
-                ]);
-            }
-            $talentIds = [(string) $talent->id];
-        } else {
-            $talentIds = $this->normalizeTalentIds($request);
-        }
+        $requests = [
+            'group' => $request->query('group'),
+            'talent' => $request->query('talent'),
+        ];
 
-        $relYoutubeMusicVideoTalentAggregateList = $this->relYoutubeMusicVideoTalentRepository
-            ->all()
-            ->filterByTalentIds($talentIds);
-        $mstYoutubeMusicVideoAggregateList = $this->mstYoutubeMusicVideoRepository
-            ->all()
-            ->filterByIds($relYoutubeMusicVideoTalentAggregateList->getYoutubeMusicVideoIds())
+        $mstTalentGroupAggregateList = $this->mstTalentGroupRepository->all();
+        $mstTalentAggregateList = $this->mstTalentRepository->all();
+        $mstYoutubeMusicVideoAggregateList = $this->mstYoutubeMusicVideoRepository->all();
+        $relTalentGroupMemberAggregateList = $this->relTalentGroupMemberRepository->all();
+        $relYoutubeMusicVideoTalentAggregateList = $this->relYoutubeMusicVideoTalentRepository->all();
+
+        if (is_string($requests['group']) && trim($requests['group']) !== '') {
+            $mstTalentGroupAggregateList = $mstTalentGroupAggregateList->filterByTalentGroupNameEnSlug(trim($requests['group']));
+            $mstTalentGroupAggregate = $mstTalentGroupAggregateList->getAggregates()->first();
+            $relTalentGroupMemberAggregateList = $relTalentGroupMemberAggregateList->filterByTalentGroup($mstTalentGroupAggregate);
+            $mstTalentAggregateList = $mstTalentAggregateList->filterByTalentGroup($mstTalentGroupAggregate, $relTalentGroupMemberAggregateList);
+        }
+        if (is_string($requests['talent']) && trim($requests['talent']) !== '') {
+            $mstTalentAggregateList = $mstTalentAggregateList->filterByTalentNameEnSlug(trim($requests['talent']));
+        }
+        $talentIds = $mstTalentAggregateList->getIds();
+        $relYoutubeMusicVideoTalentAggregateList = $relYoutubeMusicVideoTalentAggregateList->filterByTalentIds($talentIds);
+        $mstYoutubeMusicVideoAggregateList = $mstYoutubeMusicVideoAggregateList->filterByIds($relYoutubeMusicVideoTalentAggregateList->getYoutubeMusicVideoIds())
             ->sortByPublicDateDesc();
 
         return response()->json([
@@ -79,28 +83,5 @@ class TalentMusicController extends Controller
                 })->toArray(),
             ],
         ]);
-    }
-
-    /**
-     * talent_ids / talentIds のクエリ値を配列で返す（カンマ区切り文字列は explode のみ）。
-     */
-    private function normalizeTalentIds(Request $request): array
-    {
-        $raw = $request->query('talent_ids', $request->query('talentIds'));
-        if (is_string($raw)) {
-            return array_values(explode(',', $raw));
-        }
-        if (! is_array($raw)) {
-            return [];
-        }
-
-        return array_values($raw);
-    }
-
-    private function slugify(?string $raw): string
-    {
-        $s = strtolower(trim((string) $raw));
-        $s = preg_replace('/[^a-z0-9]+/', '-', $s) ?? '';
-        return trim($s, '-');
     }
 }
