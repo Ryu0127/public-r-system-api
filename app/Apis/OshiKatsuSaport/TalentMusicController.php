@@ -58,12 +58,14 @@ class TalentMusicController extends Controller
             $mstTalentGroupAggregate = $mstTalentGroupAggregateList->getAggregates()->first();
             $relTalentGroupMemberAggregateList = $relTalentGroupMemberAggregateList->filterByTalentGroup($mstTalentGroupAggregate);
             $mstTalentAggregateList = $mstTalentAggregateList->filterByTalentGroup($mstTalentGroupAggregate, $relTalentGroupMemberAggregateList);
+            $talentIds = $mstTalentAggregateList->getIds();
+            $relYoutubeMusicVideoTalentAggregateList = $relYoutubeMusicVideoTalentAggregateList->filterMusicByTalentIds($talentIds);
         }
         if (is_string($requests['talent']) && trim($requests['talent']) !== '') {
             $mstTalentAggregateList = $mstTalentAggregateList->filterByTalentNameEnSlug(trim($requests['talent']));
+            $talentIds = $mstTalentAggregateList->getIds();
+            $relYoutubeMusicVideoTalentAggregateList = $relYoutubeMusicVideoTalentAggregateList->filterByTalentIds($talentIds);
         }
-        $talentIds = $mstTalentAggregateList->getIds();
-        $relYoutubeMusicVideoTalentAggregateList = $relYoutubeMusicVideoTalentAggregateList->filterByTalentIds($talentIds);
         $mstYoutubeMusicVideoAggregateList = $mstYoutubeMusicVideoAggregateList->filterByIds($relYoutubeMusicVideoTalentAggregateList->getYoutubeMusicVideoIds())
             ->sortByPublicDateDesc();
 
