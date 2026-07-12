@@ -11,6 +11,7 @@ use App\Apis\Home\HomeController;
 use App\Apis\Life\LifeScheduleDayTaskController;
 use App\Apis\Life\LifeScheduleMonthTaskController;
 use App\Apis\OshiKatsuSaport\OshiKatsuSaportController;
+use App\Apis\OshiKatsuSaport\TalentsListController;
 use App\Apis\OshiKatsuSaport\TalentMusicTalentsController;
 use App\Apis\OshiKatsuSaport\TalentMusicController;
 use App\Apis\Sync\Life\LifeScheduleController;
@@ -89,9 +90,9 @@ Route::get('/home/limited-time-topic', [HomeController::class, 'limitedTimeTopic
  * 推し活サポート
  * --------------------------------------------------------------------------
  */
-// GET:推し活サポート-タレント一覧取得API
-Route::get('/oshi-katsu-saport/talents', [OshiKatsuSaportController::class, 'talents']);
-// GET:推し活サポート-タレント別楽曲一覧（タレント選択用）
+// GET:推し活サポート-タレント一覧取得API（画面共通・グループ情報付き）
+Route::get('/oshi-katsu-saport/talents', [TalentsListController::class, 'index']);
+// GET:推し活サポート-タレント別楽曲一覧（タレント選択用）※旧クライアント互換のため残置
 Route::get('/oshi-katsu-saport/talent-music/talents', [TalentMusicTalentsController::class, 'index']);
 // GET:推し活サポート-タレント別ハッシュタグ取得API
 Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportController::class, 'talentHashtags']);
