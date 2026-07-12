@@ -43,37 +43,6 @@ class OshiKatsuSaportController extends Controller
     }
 
     /**
-     * タレント一覧取得API
-     * GET /oshi-katsu-saport/talents
-     *
-     * @return JsonResponse
-     */
-    public function talents(): JsonResponse
-    {
-        // select
-        $talentAggregateList = $this->talentHashtagApplicationService->selectTalent();
-        $talentHashtagAggregateList = $this->talentHashtagApplicationService->selectTalentHashtag();
-        // find
-        $foundTalentAggregateList = $this->talentHashtagApplicationService->findTalentByTalentHashtag($talentAggregateList, $talentHashtagAggregateList);
-        // response
-        $talentAggregates = $foundTalentAggregateList->getAggregates();
-        $responseData = [
-            'status' => true,
-            'data' => [
-                'talents' => $talentAggregates->map(function (TalentAggregate $talentAggregate) {
-                    return [
-                        'id' => $talentAggregate->getEntity()->id,
-                        'talentName' => $talentAggregate->getEntity()->talent_name,
-                        'talentNameEn' => $talentAggregate->getEntity()->talent_name_en,
-                        'talentSlug' => $this->slugify($talentAggregate->getEntity()->talent_name_en),
-                    ];
-                }),
-            ],
-        ];
-        return response()->json($responseData);
-    }
-
-    /**
      * エゴサーチサポート用タレント一覧取得API
      * GET /oshi-katsu-saport/ego-search/talents
      *
