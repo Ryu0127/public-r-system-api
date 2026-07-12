@@ -96,6 +96,10 @@ class TalentMusicController extends Controller
 
         $allAggregates = $mstYoutubeMusicVideoAggregateList->getAggregates()->values();
         $total = $allAggregates->count();
+        $originalCount = $allAggregates->filter(function ($aggregate) {
+            return $aggregate->getEntity()->music_type == '1';
+        })->count();
+        $coverCount = $total - $originalCount;
         $lastPage = max(1, (int) ceil($total / $perPage));
         $page = min($page, $lastPage);
         $from = $total > 0 ? (($page - 1) * $perPage) + 1 : null;
@@ -105,6 +109,11 @@ class TalentMusicController extends Controller
         return response()->json([
             'status' => true,
             'data' => [
+                'counts' => [
+                    'all' => $total,
+                    'original' => $originalCount,
+                    'cover' => $coverCount,
+                ],
                 'pagination' => [
                     'total' => $total,
                     'perPage' => $perPage,
