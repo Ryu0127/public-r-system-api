@@ -21,9 +21,17 @@ class MstYoutubeMusicVideoAggregateList
 
     public function filterByIds(array $ids): MstYoutubeMusicVideoAggregateList
     {
-        return new MstYoutubeMusicVideoAggregateList($this->aggregates->filter(function ($aggregate) use ($ids) {
-            return in_array($aggregate->getEntity()->id, $ids);
-        }));
+        $idSet = array_fill_keys(array_map('intval', $ids), true);
+        return new MstYoutubeMusicVideoAggregateList($this->aggregates->filter(function ($aggregate) use ($idSet) {
+            return isset($idSet[(int) $aggregate->getEntity()->id]);
+        })->values());
+    }
+
+    public function filterByViewFlag(int $viewFlag): MstYoutubeMusicVideoAggregateList
+    {
+        return new MstYoutubeMusicVideoAggregateList($this->aggregates->filter(function ($aggregate) use ($viewFlag) {
+            return (int) ($aggregate->getEntity()->view_flag ?? 0) === $viewFlag;
+        })->values());
     }
 
     public function sortByPublicDateDesc(): MstYoutubeMusicVideoAggregateList
