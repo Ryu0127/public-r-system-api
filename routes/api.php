@@ -97,7 +97,7 @@ Route::get('/oshi-katsu-saport/talent-music/talents', [TalentMusicTalentsControl
 Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportController::class, 'talentHashtags']);
 // GET:推し活サポート-エゴサーチ用タレント一覧取得API
 Route::get('/oshi-katsu-saport/ego-search/talents', [OshiKatsuSaportController::class, 'egoSearchTalents']);
-// GET:推し活サポート-タレント別楽曲一覧取得API（talent_ids: 複数指定可。例: ?talent_ids=1,2 または talent_ids[]=1&talent_ids[]=2）
+// GET:推し活サポート-タレント別楽曲一覧取得API（talent / group 任意。未指定時は全件。page / perPage でページネーション）
 Route::get('/oshi-katsu-saport/talent-music', [TalentMusicController::class, 'index']);
 
 /*
