@@ -107,6 +107,8 @@ Route::get('/oshi-katsu-saport/talent-music', [TalentMusicController::class, 'in
  * ショー&パレード / 混雑
  * --------------------------------------------------------------------------
  */
+// GET:ショー・パレード一覧取得API（マスタ＋公演時刻）
+Route::get('/showtimes/show-parades', [ShowtimesController::class, 'showParades']);
 // GET:TDL ショー&パレード・混雑データ取得API（モック）
 Route::get('/showtimes/tdl', [ShowtimesController::class, 'tdl']);
 
