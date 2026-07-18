@@ -14,6 +14,7 @@ use App\Apis\OshiKatsuSaport\OshiKatsuSaportController;
 use App\Apis\OshiKatsuSaport\TalentsListController;
 use App\Apis\OshiKatsuSaport\TalentMusicTalentsController;
 use App\Apis\OshiKatsuSaport\TalentMusicController;
+use App\Apis\Showtimes\ShowtimesController;
 use App\Apis\Sync\Life\LifeScheduleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -100,6 +101,14 @@ Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportControlle
 Route::get('/oshi-katsu-saport/ego-search/talents', [OshiKatsuSaportController::class, 'egoSearchTalents']);
 // GET:推し活サポート-タレント別楽曲一覧取得API（talent / group 任意。未指定時は全件。page / perPage でページネーション）
 Route::get('/oshi-katsu-saport/talent-music', [TalentMusicController::class, 'index']);
+
+/*
+ * --------------------------------------------------------------------------
+ * ショー&パレード / 混雑
+ * --------------------------------------------------------------------------
+ */
+// GET:TDL ショー&パレード・混雑データ取得API（モック）
+Route::get('/showtimes/tdl', [ShowtimesController::class, 'tdl']);
 
 /*
  * --------------------------------------------------------------------------
