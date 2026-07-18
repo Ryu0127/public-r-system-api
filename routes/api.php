@@ -109,6 +109,10 @@ Route::get('/oshi-katsu-saport/talent-music', [TalentMusicController::class, 'in
  */
 // GET:ショー・パレード一覧取得API（マスタ＋公演時刻）
 Route::get('/showtimes/show-parades', [ShowtimesController::class, 'showParades']);
+// GET:アトラクション一覧取得API（マスタ）
+Route::get('/showtimes/attractions', [ShowtimesController::class, 'attractions']);
+// GET:アトラクション時間帯別予想待ち時間取得API
+Route::get('/showtimes/attraction-wait-forecasts', [ShowtimesController::class, 'attractionWaitForecasts']);
 // GET:TDL ショー&パレード・混雑データ取得API（モック）
 Route::get('/showtimes/tdl', [ShowtimesController::class, 'tdl']);
 

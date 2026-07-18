@@ -32,9 +32,9 @@ class TblDisneyParkShowParadeScheduleRepository
     /**
      * ショー・パレードIDで取得
      */
-    public function findByShowParadeId(int $showParadeId): DisneyParkShowParadeScheduleAggregateList
+    public function findByDisneyParkShowParadeId(int $disneyParkShowParadeId): DisneyParkShowParadeScheduleAggregateList
     {
-        $entities = TblDisneyParkShowParadeSchedule::where('show_parade_id', $showParadeId)
+        $entities = TblDisneyParkShowParadeSchedule::where('disney_park_show_parade_id', $disneyParkShowParadeId)
             ->orderBy('start_time')
             ->orderBy('id')
             ->get();
@@ -44,15 +44,15 @@ class TblDisneyParkShowParadeScheduleRepository
     /**
      * ショー・パレードID一覧で取得
      *
-     * @param list<int> $showParadeIds
+     * @param list<int> $disneyParkShowParadeId
      */
-    public function findByShowParadeIds(array $showParadeIds): DisneyParkShowParadeScheduleAggregateList
+    public function findByShowParadeIds(array $disneyParkShowParadeId): DisneyParkShowParadeScheduleAggregateList
     {
-        if ($showParadeIds === []) {
+        if ($disneyParkShowParadeId === []) {
             return new DisneyParkShowParadeScheduleAggregateList(new Collection());
         }
 
-        $entities = TblDisneyParkShowParadeSchedule::whereIn('show_parade_id', $showParadeIds)
+        $entities = TblDisneyParkShowParadeSchedule::whereIn('disney_park_show_parade_id', $disneyParkShowParadeId)
             ->orderBy('start_time')
             ->orderBy('id')
             ->get();
@@ -108,7 +108,7 @@ class TblDisneyParkShowParadeScheduleRepository
     private function generateEntityByAllColume($object)
     {
         return [
-            'show_parade_id' => $object->show_parade_id ?? null,
+            'disney_park_show_parade_id' => $object->disney_park_show_parade_id ?? null,
             'start_time' => $object->start_time ?? null,
             'note' => $object->note ?? null,
             'cancel_flag' => $object->cancel_flag ?? 0,

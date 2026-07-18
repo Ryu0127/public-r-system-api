@@ -48,11 +48,11 @@ class DisneyParkShowParadeScheduleAggregateList
     /**
      * ショー・パレードIDで絞る
      */
-    public function filterByShowParadeId(int $showParadeId): DisneyParkShowParadeScheduleAggregateList
+    public function filterByDisneyParkShowParadeId(int $disneyParkShowParadeId): DisneyParkShowParadeScheduleAggregateList
     {
         return new DisneyParkShowParadeScheduleAggregateList(
-            $this->aggregates->filter(function ($aggregate) use ($showParadeId) {
-                return (int) $aggregate->getEntity()->show_parade_id === $showParadeId;
+            $this->aggregates->filter(function ($aggregate) use ($disneyParkShowParadeId) {
+                return (int) $aggregate->getEntity()->disney_park_show_parade_id === $disneyParkShowParadeId;
             })->values()
         );
     }
@@ -60,15 +60,15 @@ class DisneyParkShowParadeScheduleAggregateList
     /**
      * ショー・パレードID一覧で絞る
      *
-     * @param list<int> $showParadeIds
+     * @param list<int> $disneyParkShowParadeIds
      */
-    public function filterByShowParadeIds(array $showParadeIds): DisneyParkShowParadeScheduleAggregateList
+    public function filterByDisneyParkShowParadeIds(array $disneyParkShowParadeIds): DisneyParkShowParadeScheduleAggregateList
     {
-        $idSet = array_map('intval', $showParadeIds);
+        $idSet = array_map('intval', $disneyParkShowParadeIds);
 
         return new DisneyParkShowParadeScheduleAggregateList(
             $this->aggregates->filter(function ($aggregate) use ($idSet) {
-                return in_array((int) $aggregate->getEntity()->show_parade_id, $idSet, true);
+                return in_array((int) $aggregate->getEntity()->disney_park_show_parade_id, $idSet, true);
             })->values()
         );
     }
