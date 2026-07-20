@@ -113,6 +113,12 @@ Route::get('/showtimes/show-parades', [ShowtimesController::class, 'showParades'
 Route::get('/showtimes/attractions', [ShowtimesController::class, 'attractions']);
 // GET:アトラクション時間帯別予想待ち時間取得API
 Route::get('/showtimes/attraction-wait-forecasts', [ShowtimesController::class, 'attractionWaitForecasts']);
+// GET:フード販売ショップ一覧取得API（マスタ）
+Route::get('/showtimes/food-shops', [ShowtimesController::class, 'foodShops']);
+// GET:フードメニュー一覧取得API（マスタ）
+Route::get('/showtimes/food-menus', [ShowtimesController::class, 'foodMenus']);
+// GET:フードメニュー内容一覧取得API（マスタ）
+Route::get('/showtimes/food-menu-contents', [ShowtimesController::class, 'foodMenuContents']);
 // GET:TDL ショー&パレード・混雑データ取得API（モック）
 Route::get('/showtimes/tdl', [ShowtimesController::class, 'tdl']);
 
