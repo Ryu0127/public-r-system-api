@@ -14,6 +14,7 @@ use App\Apis\OshiKatsuSaport\OshiKatsuSaportController;
 use App\Apis\OshiKatsuSaport\TalentsListController;
 use App\Apis\OshiKatsuSaport\TalentMusicTalentsController;
 use App\Apis\OshiKatsuSaport\TalentMusicController;
+use App\Apis\Showtimes\FavoritesController;
 use App\Apis\Showtimes\ShowtimesController;
 use App\Apis\Sync\Life\LifeScheduleController;
 use Illuminate\Http\Request;
@@ -64,6 +65,12 @@ Route::middleware(['auth.token', 'check.origin'])->group(function () {
     Route::post('/life/schedule-day/tasks', [LifeScheduleDayTaskController::class, 'doUpdate']);
     // GET:LifeSystem-月次スケジュールタスク（データ取得API）
     Route::get('/life/schedule-month/tasks/{yearMonth}', [LifeScheduleMonthTaskController::class, 'index']);
+    // GET:ショーパレお気に入り一覧
+    Route::get('/showtimes/favorites', [FavoritesController::class, 'index']);
+    // POST:ショーパレお気に入り登録
+    Route::post('/showtimes/favorites', [FavoritesController::class, 'store']);
+    // DELETE:ショーパレお気に入り解除
+    Route::delete('/showtimes/favorites/{favoriteType}/{targetId}', [FavoritesController::class, 'destroy']);
 });
 
 /*
