@@ -2,6 +2,8 @@
 
 use App\Apis\Admin\TalentsController;
 use App\Apis\Admin\TalentMusicController as AdminTalentMusicController;
+use App\Apis\Admin\MusicPlaylistsController as AdminMusicPlaylistsController;
+use App\Apis\Admin\MusicPlaylistMusicController as AdminMusicPlaylistMusicController;
 use App\Apis\Auth\LoginController;
 use App\Apis\Auth\AutoLoginController;
 use App\Apis\Auth\LogoutController;
@@ -14,6 +16,7 @@ use App\Apis\OshiKatsuSaport\OshiKatsuSaportController;
 use App\Apis\OshiKatsuSaport\TalentsListController;
 use App\Apis\OshiKatsuSaport\TalentMusicTalentsController;
 use App\Apis\OshiKatsuSaport\TalentMusicController;
+use App\Apis\OshiKatsuSaport\TalentMusicPlaylistsController;
 use App\Apis\Showtimes\FavoritesController;
 use App\Apis\Showtimes\ShowtimesController;
 use App\Apis\Sync\Life\LifeScheduleController;
@@ -108,6 +111,8 @@ Route::get('/oshi-katsu-saport/talents/{id}/hashtags', [OshiKatsuSaportControlle
 Route::get('/oshi-katsu-saport/ego-search/talents', [OshiKatsuSaportController::class, 'egoSearchTalents']);
 // GET:推し活サポート-タレント別楽曲一覧取得API（talent / group 任意。未指定時は全件。page / perPage でページネーション）
 Route::get('/oshi-katsu-saport/talent-music', [TalentMusicController::class, 'index']);
+// GET:推し活サポート-楽曲一覧画面のYouTubeプレイリスト一覧取得API（表示フラグ=1、登録順）
+Route::get('/oshi-katsu-saport/talent-music/playlists', [TalentMusicPlaylistsController::class, 'index']);
 
 /*
  * --------------------------------------------------------------------------
@@ -180,4 +185,27 @@ Route::get('/showtimes/tdl', [ShowtimesController::class, 'tdl']);
     Route::put('/admin/talent-music/{id}', [AdminTalentMusicController::class, 'update']);
     // DELETE:楽曲一覧管理-楽曲削除API
     Route::delete('/admin/talent-music/{id}', [AdminTalentMusicController::class, 'destroy']);
+// });
+
+/*
+ * --------------------------------------------------------------------------
+ * プレイリスト管理（楽曲一覧画面に表示する YouTube プレイリスト）
+ * --------------------------------------------------------------------------
+ */
+// トークン認証 + ドメイン制限ルート（他の管理APIと同様、現状は未適用）
+// Route::middleware(['auth.token', 'check.origin'])->group(function () {
+    // GET:プレイリスト管理-プレイリスト一覧取得API（非表示含む）
+    Route::get('/admin/music-playlists', [AdminMusicPlaylistsController::class, 'index']);
+    // GET:プレイリスト管理-プレイリスト詳細取得API
+    Route::get('/admin/music-playlists/{id}', [AdminMusicPlaylistsController::class, 'show']);
+    // POST:プレイリスト管理-プレイリスト登録API
+    Route::post('/admin/music-playlists', [AdminMusicPlaylistsController::class, 'store']);
+    // PUT:プレイリスト管理-プレイリスト更新API
+    Route::put('/admin/music-playlists/{id}', [AdminMusicPlaylistsController::class, 'update']);
+    // DELETE:プレイリスト管理-プレイリスト削除API（紐付け楽曲・楽曲ごとのタレント紐付けも削除）
+    Route::delete('/admin/music-playlists/{id}', [AdminMusicPlaylistsController::class, 'destroy']);
+    // GET:プレイリスト管理-紐付け楽曲一覧取得API（並び順・楽曲ごとのタレント付き）
+    Route::get('/admin/music-playlists/{id}/music', [AdminMusicPlaylistMusicController::class, 'index']);
+    // PUT:プレイリスト管理-紐付け楽曲更新API（指定された楽曲・順序・タレントで置き換え）
+    Route::put('/admin/music-playlists/{id}/music', [AdminMusicPlaylistMusicController::class, 'update']);
 // });
